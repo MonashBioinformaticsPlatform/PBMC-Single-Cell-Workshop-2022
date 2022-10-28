@@ -1,5 +1,5 @@
 
-# This content is the [Seurat PBMC tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) with an additional sections on SingleR for cell type classification and Monocle for pseudotime trajectory analysis.
+# This content is the [Seurat PBMC tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) with an additional sections on SingleR for cell type classification and Harmony for dataset integration.
 
 # Please go to the [installation page](https://monashbioinformaticsplatform.github.io/Single-Cell-Workshop/installation.html) for instructions on how to install the libraries used for this workshop. There are also instructions for downloading the [raw data](http://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz) there as well.
 
@@ -192,9 +192,9 @@ pbmc <- NormalizeData(pbmc)
 
 # Identification of highly variable features (feature selection) --------
 
-# We next calculate a subset of features that exhibit high cell-to-cell variation in the dataset (i.e, they are highly expressed in some cells, and lowly expressed in others). We and [others](https://www.nature.com/articles/nmeth.2645) have found that focusing on these genes in downstream analysis helps to highlight biological signal in single-cell datasets.
+# We next calculate a subset of features that exhibit high cell-to-cell variation in the dataset (i.e, they are highly expressed in some cells, and lowly expressed in others). The Seurat developers and [others](https://www.nature.com/articles/nmeth.2645) have found that focusing on these genes in downstream analysis helps to highlight biological signal in single-cell datasets.
 
-# Our procedure in Seurat is described in detail [here](https://doi.org/10.1016/j.cell.2019.05.031), and improves on previous versions by directly modeling the mean-variance relationship inherent in single-cell data, and is implemented in the FindVariableFeatures() function. By default, we return 2,000 features per dataset. These will be used in downstream analysis, like PCA.
+# The procedure in Seurat is described in detail [here](https://doi.org/10.1016/j.cell.2019.05.031), and improves on previous versions by directly modeling the mean-variance relationship inherent in single-cell data, and is implemented in the FindVariableFeatures() function. By default, we return 2,000 features per dataset. These will be used in downstream analysis, like PCA.
 
 pbmc <- FindVariableFeatures(pbmc, selection.method = 'vst', nfeatures = 2000)
 
@@ -236,11 +236,11 @@ pbmc <- ScaleData(pbmc, features = all.genes)
 
 #   **How can I remove unwanted sources of variation, as in Seurat v2?**
 
-# In Seurat v2 we also use the ScaleData() function to remove unwanted sources of variation from a single-cell dataset. For example, we could 'regress out' heterogeneity associated with (for example) cell cycle stage, or mitochondrial contamination. These features are still supported in ScaleData() in Seurat v3, i.e.:
+# In Seurat v2 we can also use the ScaleData() function to remove unwanted sources of variation from a single-cell dataset. For example, we could 'regress out' heterogeneity associated with (for example) cell cycle stage, or mitochondrial contamination. These features are still supported in ScaleData() in Seurat v3, i.e.:
 
 # pbmc <- ScaleData(pbmc, vars.to.regress = 'percent.mt')
 
-# However, particularly for advanced users who would like to use this functionality, we strongly recommend the use of our new normalization workflow, SCTransform(). The method is described in our [paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1), with a separate vignette using Seurat v3 [here](sctransform_vignette.html). As with ScaleData(), the function SCTransform() also includes a vars.to.regress parameter.
+# However, particularly for advanced users who would like to use this functionality, the Seurat developers recommend their new normalization workflow, SCTransform(). The method is described in their [paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1), with a separate vignette using Seurat v3 [here](sctransform_vignette.html). As with ScaleData(), the function SCTransform() also includes a vars.to.regress parameter.
 
 
 # Perform linear dimensional reduction --------
@@ -267,35 +267,13 @@ DimHeatmap(pbmc, dims = 1:15, cells = 500, balanced = TRUE)
 
 # To overcome the extensive technical noise in any single feature for scRNA-seq data, Seurat clusters cells based on their PCA scores, with each PC essentially representing a 'metafeature' that combines information across a correlated feature set. The top principal components therefore represent a robust compression of the dataset. However, how many components should we choose to include? 10? 20? 100?
 
-# In [Macosko *et al*](http://www.cell.com/abstract/S0092-8674(15)00549-8), we implemented a resampling test inspired by the JackStraw procedure. We randomly permute a subset of the data (1% by default) and rerun PCA, constructing a 'null distribution' of feature scores, and repeat this procedure. We identify 'significant' PCs as those who have a strong enrichment of low p-value features.
-
-# Note:
-# The Seurat defaults are num.replicates=100, prop.freq=0.01.
-# The parameters we're using here are just for speed,
-#   and will give conservative p-values.
-
-pbmc <- JackStraw(pbmc, num.replicate=10, prop.freq=0.1)
-pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
-
-# The JackStrawPlot() function provides a visualization tool for comparing the distribution of p-values for each PC with a uniform distribution (dashed line). 'Significant' PCs will show a strong enrichment of features with low p-values (solid curve above the dashed line). In this case it appears that there is a sharp drop-off in significance after the first 10-12 PCs.
-
-JackStrawPlot(pbmc, dims = 1:15)
-
-# Seurat plots this in a weird way. Let's adjust it a bit.
-JackStrawPlot(pbmc, dims = 1:15) +
-  coord_cartesian() +
-  geom_abline(intercept=0, slope=0.05)
-
-# For each PC, the furthest point to the right below the solid line
-#   gives proportion of significant genes with FDR 0.05.
-
-# An alternative heuristic method generates an 'Elbow plot': a ranking of principle components based on the percentage of variance explained by each one (ElbowPlot() function). In this example, we can observe an 'elbow' around PC9-10, suggesting that the majority of true signal is captured in the first 10 PCs.
+# One heuristic method that can be used is an 'Elbow plot': a ranking of principle components based on the percentage of variance explained by each one (ElbowPlot() function). In this example, we can observe an 'elbow' around PC9-10, suggesting that the majority of true signal is captured in the first 10 PCs.
 
 ElbowPlot(pbmc)
 
-# Identifying the true dimensionality of a dataset -- can be challenging/uncertain for the user. We therefore suggest these three approaches to consider. The first is more supervised, exploring PCs to determine relevant sources of heterogeneity, and could be used in conjunction with GSEA for example. The second implements a statistical test based on a random null model, but is time-consuming for large datasets, and may not return a clear PC cutoff. The third is a heuristic that is commonly used, and can be calculated instantly. In this example, all three approaches yielded similar results, but we might have been justified in choosing anything between PC 7-12 as a cutoff.
+# Identifying the true dimensionality of a dataset -- can be challenging/uncertain for the user. The Seurat developers suggest these three approaches to consider. The first is more supervised, exploring PCs to determine relevant sources of heterogeneity, and could be used in conjunction with GSEA for example. The second implements a statistical test based on a random null model, but is time-consuming for large datasets, and may not return a clear PC cutoff. The third is a heuristic that is commonly used, and can be calculated instantly. In this example, all three approaches yielded similar results, but we might have been justified in choosing anything between PC 7-12 as a cutoff.
 
-# We chose 10 here, but encourage users to consider the following:
+# We use 10 here, but encourage users to consider the following:
 
 # * Dendritic cell and NK aficionados may recognize that genes strongly associated with PCs 12 and 13 define rare immune subsets (i.e. MZB1 is a marker for plasmacytoid DCs). However, these groups are so rare, they are difficult to distinguish from background noise for a dataset of this size without prior knowledge.
 # * We encourage users to repeat downstream analyses with a different number of PCs (10, 15, or even 50!). As you will observe, the results often do not differ dramatically.
@@ -304,11 +282,11 @@ ElbowPlot(pbmc)
 
 # Cluster the cells --------
 
-# Seurat v3 applies a graph-based clustering approach, building upon initial strategies in ([Macosko *et al*](http://www.cell.com/abstract/S0092-8674(15)00549-8)). Importantly, the *distance metric* which drives the clustering analysis (based on previously identified PCs) remains the same. However, our approach to partitioning the cellular distance matrix into clusters has dramatically improved. Our approach was heavily inspired by recent manuscripts which applied graph-based clustering approaches to scRNA-seq data [[SNN-Cliq, Xu and Su, Bioinformatics, 2015]](http://bioinformatics.oxfordjournals.org/content/early/2015/02/10/bioinformatics.btv088.abstract) and CyTOF data [[PhenoGraph, Levine *et al*., Cell, 2015]](http://www.ncbi.nlm.nih.gov/pubmed/26095251). Briefly, these methods embed cells in a graph structure - for example a K-nearest neighbor (KNN) graph, with edges drawn between cells with similar feature expression patterns, and then attempt to partition this graph into highly interconnected 'quasi-cliques' or 'communities'.
+# Seurat v3 applies a graph-based clustering approach, building upon initial strategies in ([Macosko *et al*](http://www.cell.com/abstract/S0092-8674(15)00549-8)). Importantly, the *distance metric* which drives the clustering analysis (based on previously identified PCs) remains the same. However, the Seurat approach to partitioning the cellular distance matrix into clusters has dramatically improved. The Seurat approach was heavily inspired by recent manuscripts which applied graph-based clustering approaches to scRNA-seq data [[SNN-Cliq, Xu and Su, Bioinformatics, 2015]](http://bioinformatics.oxfordjournals.org/content/early/2015/02/10/bioinformatics.btv088.abstract) and CyTOF data [[PhenoGraph, Levine *et al*., Cell, 2015]](http://www.ncbi.nlm.nih.gov/pubmed/26095251). Briefly, these methods embed cells in a graph structure - for example a K-nearest neighbor (KNN) graph, with edges drawn between cells with similar feature expression patterns, and then attempt to partition this graph into highly interconnected 'quasi-cliques' or 'communities'.
 
-# As in PhenoGraph, we first construct a KNN graph based on the euclidean distance in PCA space, and refine the edge weights between any two cells based on the shared overlap in their local neighborhoods (Jaccard similarity). This step is performed using the FindNeighbors() function, and takes as input the previously defined dimensionality of the dataset (first 10 PCs).
+# As in PhenoGraph, Seurat first constructs a KNN graph based on the euclidean distance in PCA space, and then refines the edge weights between any two cells based on the shared overlap in their local neighborhoods (Jaccard similarity). This step is performed using the FindNeighbors() function, and takes as input the previously defined dimensionality of the dataset (first 10 PCs).
 
-# To cluster the cells, we next apply modularity optimization techniques such as the Louvain algorithm (default) or SLM [[SLM, Blondel *et al*., Journal of Statistical Mechanics]](http://dx.doi.org/10.1088/1742-5468/2008/10/P10008), to iteratively group cells together, with the goal of optimizing the standard modularity function. The FindClusters() function implements this procedure, and contains a resolution parameter that sets the 'granularity' of the downstream clustering, with increased values leading to a greater number of clusters. We find that setting this parameter between 0.4-1.2 typically returns good results for single-cell datasets of around 3K cells. Optimal resolution often increases for larger datasets. The clusters can be found using the Idents() function.
+# To cluster the cells, Seurat next applies modularity optimization techniques such as the Louvain algorithm (default) or SLM [[SLM, Blondel *et al*., Journal of Statistical Mechanics]](http://dx.doi.org/10.1088/1742-5468/2008/10/P10008), to iteratively group cells together, with the goal of optimizing the standard modularity function. The FindClusters() function implements this procedure, and contains a resolution parameter that sets the 'granularity' of the downstream clustering, with increased values leading to a greater number of clusters. We find that setting this parameter between 0.4-1.2 typically returns good results for single-cell datasets of around 3K cells. Optimal resolution often increases for larger datasets. The clusters can be found using the Idents() function.
 
 pbmc <- FindNeighbors(pbmc, dims = 1:10)
 pbmc <- FindClusters(pbmc, resolution = 0.5)
@@ -355,11 +333,11 @@ head(cluster5.markers, n = 5)
 pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 pbmc.markers %>% group_by(cluster) %>% slice_max(n = 2, order_by = avg_log2FC)
 
-# Seurat has several tests for differential expression which can be set with the test.use parameter (see our [DE vignette](de_vignette.html) for details). For example, the ROC test returns the 'classification power' abs(AUC-0.5)*2 for any individual marker, ranging from 0 = random to 1 = perfect.
+# Seurat has several tests for differential expression which can be set with the test.use parameter (see the Seurat [differential expression vignette](de_vignette.html) for details). For example, the ROC test returns the 'classification power' abs(AUC-0.5)*2 for any individual marker, ranging from 0 = random to 1 = perfect.
 
 cluster0.markers <- FindMarkers(pbmc, ident.1 = 0, logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
 
-# We include several tools for visualizing marker expression. VlnPlot() (shows expression probability distributions across clusters), and FeaturePlot() (visualizes feature expression on a tSNE or PCA plot) are our most commonly used visualizations. We also suggest exploring RidgePlot(), CellScatter(), and DotPlot() as additional methods to view your dataset.
+# Seurat includes several tools for visualizing marker expression. VlnPlot() (shows expression probability distributions across clusters), and FeaturePlot() (visualizes feature expression on a tSNE or PCA plot) are some of the most commonly used visualizations. Additional ways to explore your dataset include RidgePlot(), CellScatter(), and DotPlot().
 
 VlnPlot(pbmc, features = c("MS4A1", "CD79A"))
 # you can plot raw counts as well
@@ -454,135 +432,62 @@ DimPlot(pbmc, reduction='umap', group.by='SingleR.labels')
 # It is nice to see that SingleR does not use the clusters we computed earlier, but the labels do seem to match those clusters reasonably well.
 
 
-# Using Monocle For Pseudotime Trajectory (Time permits) --------
+# Data set integration with Harmony --------
 
-# For this workshop, we'll use the PBMC data object with Monocle for pseudotime trajectory analysis. It's debatable whether this is a suitable dataset but will suit our needs for demonstration purposes.
+# When data is collected from multiple samples, multiple runs of the single cell sequencing library preparation, or multiple conditions, cells of the same type may become separated in the UMAP and be put into several different clusters.
 
-# This content is based off the [Calculating Trajectories with Monocle 3 and Seurat](http://htmlpreview.github.io/?https://github.com/satijalab/seurat-wrappers/blob/master/docs/monocle3.html) material as well the [Monocle3 documentation](https://cole-trapnell-lab.github.io/monocle3/docs/starting/), combining it with the PBMC dataset from the original Seurat vignette. We recommend reading the [Monocle3 documentation](https://cole-trapnell-lab.github.io/monocle3/docs/starting/) for greater understanding of the Monocle package.
+# For the purpose of clustering and cell identification, we would like to remove such effects.
 
-# Firstly, load Monocle:
+# We will now look at [GSE96583](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE96583). For speed, we will be looking at a subset of 5000 cells from this data. The cells in this dataset were pooled from eight individual donors. A nice feature is that genetic differences allow some of the cell doublets to be identified. This data contains two batches of single cell sequencing. One of the batches was stimulated with IFN-beta.
 
-library(monocle3)
-library(SeuratWrappers)
+# The data has already been processed as we have done with the first PBMC dataset, and can be loaded from kang2018.rds.
 
-# As the PBMC data has been processed, we can proceed with converting the pbmc Seurat object to a cell_data_set object, which is a class from the Monocle package. The as.cell_data_set function is used from the SeuratWrappers library and is used to convert the Seurat object into a cell_data_set object.
+kang <- readRDS("kang2018.rds")
 
-# While we have performed the general analysis steps of quality control, scaling and normalization, dimensionality reduction and clustering with Seurat, Monocle is also capable of performing these steps with its own in-built functions. It is often a matter of preference which package to use, depending on what downstream tasks the analyst would like to perform.
+head(kang@meta.data)
 
-# ![](https://cole-trapnell-lab.github.io/monocle3/images/monocle3_new_workflow.png)
-# We aren't going to delve deeply into the properties of the cell_data_set object. Just be aware that this is a different way to represent the count assay data and dimensionality reduction data. The functions from the Monocle package expects the scRNA data to be this class and therefore, the Seurat object needs to be converted to this class. It also means that the Seurat functions that we've been using will not work with the cell_data_set object.
+# * ind identifies a cell as coming from one of 8 individuals.
+# * stim identifies a cell as control or stimulated with IFN-beta.
+# * cell contains the cell types identified by the creators of this data set.
+# * multiplets classifies cells as singlet or doublet.
 
-cds <- as.cell_data_set(pbmc)
+DimPlot(kang, reduction="umap", group.by="ind")
+DimPlot(kang, reduction="umap", group.by="stim")
+DimPlot(kang, reduction="pca", group.by="stim")
 
-# While we have previously clustered the pbmc dataset using Seurat, Monocle will also calculate 'partitions' - these are superclusters of the Louvain/Leiden communties that are found using a kNN pruning method. The warning message during the conversion notes that Seurat doesn't calculate partitions and clusters need to be re-calculated using Monocle.
+kang <- FindNeighbors(kang, reduction="pca", dims=1:10)
+kang <- FindClusters(kang, resolution=0.25)
+kang$pca_clusters <- kang$seurat_clusters
 
-# Examine the cds object:
+DimPlot(kang, reduction="umap", group.by="pca_clusters")
 
-## Inspect the cds object and compare it to the Seurat pbmc object
-cds
+# There is a big difference between unstimulated and stimulated cells. This has split cells of the same type into pairs of clusters. If the difference was simply uniform, we could regress it out (e.g. using ScaleData(..., vars.to.regress="stim")). However, as can be seen in the PCA plot, the difference is not uniform and we need to do something cleverer.
 
-# Now re-cluster the cds object:
+# We will use [Harmony](https://github.com/immunogenomics/harmony), which can remove non-uniform effects. We will try to remove both the small differences between individuals and the large difference between the unstimulated and stimulated cells.
 
-cds <- cluster_cells(cds)
-p1 <- plot_cells(cds, show_trajectory_graph = FALSE)
-p2 <- plot_cells(cds, color_cells_by = "partition", show_trajectory_graph = FALSE)
-wrap_plots(p1, p2)
+# Harmony operates only on the PCA scores. The original gene expression levels remain unaltered.
 
-# We can see that in the first plot, Monocle has identified 3 clusters but all the clusters fall within the same partition. Ideally, partitions should correspond to clusters of cells within the same path of differentiation or cell within the same trajectory.
+library(harmony)
 
-# ![](https://ars.els-cdn.com/content/image/1-s2.0-S0263931913000495-gr1.jpg)
+kang <- RunHarmony(kang, c("stim", "ind"), reduction="pca")
 
-# *Source: [Haematopoiesis and red blood cells](https://www.sciencedirect.com/science/article/pii/S0263931913000495)*
+# This has added a new set of reduced dimensions to the Seurat object, kang$harmony which is a modified version of the existing kang$pca reduced dimensions.
 
-# We can see from this figure of haematopoiesis that our PBMC sample contains a mix of cells from different cell types and are unlikely to be suitable for calculating a pseudotime trajectory. Nonetheless, we'll demonstrate the steps involved.
+DimPlot(kang, reduction="harmony", group.by="stim")
 
-# Next, we need to run learn_graph to learn the trajectory graph. This function aims to learn how cells transition through a biological program of gene expression changes in an experiment.
+# We can use harmony the same way we used the pca reduction to compute a UMAP layout or to find clusters.
 
-cds <- learn_graph(cds)
-plot_cells(cds, label_groups_by_cluster = FALSE,
-           label_leaves = FALSE,
-           label_branch_points = FALSE)
+kang <- RunUMAP(kang, reduction="harmony", dims=1:10, reduction.name="umap_harmony")
 
-# As expected from the partition plot, Monocle thinks all the cells are from the same partition and therefore has plotted a trajectory line that connects all clusters.
+DimPlot(kang, reduction="umap_harmony", group.by="stim")
 
-# Can we fix this?
+kang <- FindNeighbors(kang, reduction="harmony", dims=1:10)
+kang <- FindClusters(kang, resolution=0.25)
+kang$harmony_clusters <- kang$seurat_clusters
 
-# Monocle currently thinks that all cells belong to the same partition. We might be able to tweak the clustering for a better result. One thing we can think about is that we have a different number of clusters generated by Monocle (3) when Seurat gave us 9.
+DimPlot(kang, reduction="umap", group.by="harmony_clusters")
 
-# If we examine the default parameters by ?FindClusters and ?cluster_cells, we might notice that Seurat's default clustering algorithm is louvain while Monocle's is leiden. We aren't going to delve into the details of these algorithms, but we will say, just be aware of the default behavior of your analysis tools and that the choice in algorithm will affect the results of the clustering.
-
-# We can change algorithm with cds <- cluster_cells(cds, cluster_method = "louvain") but in this case, we might just try altering the resolution with the default leiden algorithm to increase the number of clusters yielded. Changing the k argument will change the number of nearest neighbors used when creating the k nearest neighbor graph. A large k value (the default is 20) reduces the number of clusters (therefore the bigger k is, the less clusters will be generated) and vice versa (smaller k value - more clusters).
-
-cds <- cluster_cells(cds, k = 5, random_seed = 5)
-p1 <- plot_cells(cds, show_trajectory_graph = FALSE)
-p2 <- plot_cells(cds, color_cells_by = "partition", show_trajectory_graph = FALSE)
-wrap_plots(p1, p2)
-
-# The UMAP on the left looks under clustered compared to our original clustering with Seurat. We'd probably need to tweak more parameters to get Monocle to match the Seurat clustering. We don't necessarily need to do that because our cds object actually still has the meta-data about the Seurat clusters stored in it (examine this with head(colData(cds)). However, importantly, our partition plot looks a little more sensible and no longer has lumped all cells into one supercluster.
-
-# Let's re-run the learn_graph step:
-
-cds <- learn_graph(cds)
-plot_cells(cds, color_cells_by = "partition",
-           label_groups_by_cluster = FALSE,
-           label_leaves = FALSE, label_branch_points = FALSE)
-
-# Monocle now 'correctly' builds trajectories that recognizes distinct cell lineages.
-
-# We might choose to remove the B-cells and monocytes and focus just on the cluster of CD4T/CD8T cells, as this is the largest group of cells.
-
-# Create a vector of idents to keep
-selected_ids <- c("Naive CD4 T", "Memory CD4 T", "CD8 T")
-tcells_pbmc <- subset(pbmc, idents = selected_ids ) ## subset the PBMC seurat object to tcells
-cds <- as.cell_data_set(tcells_pbmc) ## convert this to cell_data_set
-cds <- cluster_cells(cds)
-cds <- learn_graph(cds)
-plot_cells(cds, label_groups_by_cluster = FALSE,
-           label_leaves = FALSE, label_branch_points = FALSE)
-
-# The next step is to order cells in pseudotime:
-
-# >Pseudotime is a measure of how much progress an individual cell has made through a process such as cell differentiation.
-# >
-# > In many biological processes, cells do not progress in perfect synchrony. In single-cell expression studies of processes such as cell differentiation, captured cells might be widely distributed in terms of progress. That is, in a population of cells captured at exactly the same time, some cells might be far along, while others might not yet even have begun the process. This asynchrony creates major problems when you want to understand the sequence of regulatory changes that occur as cells transition from one state to the next. Tracking the expression across cells captured at the same time produces a very compressed sense of a gene's kinetics, and the apparent variability of that gene's expression will be very high.
-# >
-# > By ordering each cell according to its progress along a learned trajectory, Monocle alleviates the problems that arise due to asynchrony. Instead of tracking changes in expression as a function of time, Monocle tracks changes as a function of progress along the trajectory, which we term "pseudotime". Pseudotime is an abstract unit of progress: it's simply the distance between a cell and the start of the trajectory, measured along the shortest path. The trajectory's total length is defined in terms of the total amount of transcriptional change that a cell undergoes as it moves from the starting state to the end state.
-
-# *Source: [Monocle's documentation](https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/#order-cells)*
-
-# Monocle needs to be told where the 'beginning' of the biological process is. There are a variety of ways that this can be determined - the Monocle documentation has a custom function to find the root of the trajectory based on a subset of cells. If the order_cells function is used without providing which cells to use, it will launch an interface in which we can directly select cells we think are at the beginning of the trajectory.
-
-# a helper function to identify the root principal points:
-get_earliest_principal_node <- function(cds,  cell_type="Naive CD4 T"){
-  cell_ids <- which(colData(cds)[, "ident"] == cell_type)
-
-  closest_vertex <-
-  cds@principal_graph_aux$UMAP$pr_graph_cell_proj_closest_vertex
-  closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
-  root_pr_nodes <-
-  igraph::V(principal_graph(cds)$UMAP)$name[as.numeric(names
-  (which.max(table(closest_vertex[cell_ids,]))))]
-
-  root_pr_nodes
-}
-cds <- order_cells(cds, root_pr_nodes=get_earliest_principal_node(cds))
-
-# We can now plot the trajectory and color cells by pseudotime:
-
-plot_cells(cds, color_cells_by = "pseudotime",
-                 label_cell_groups = FALSE, label_leaves = FALSE,
-                 label_branch_points = FALSE)
-plot_cells(cds, color_cells_by = "ident",
-                 label_cell_groups = FALSE, label_leaves = FALSE,
-                 label_branch_points = FALSE)
-
-# Discuss the results of this pseudotime trajectory (remembering this is a bogus example):
-
-# * CD8T cells are not the furthest cell type from the naive CD4 t-cells
-# * Naive CD4 T-cells get split into two groups - cells at the root state and 'early' in terms of pseudotime and then cells that are at the end of the pseudotime  timeline
-# * Would you interpret this as naive CD4 T cells shifting into memory CD4 T-cells then CD8T cells and then back to CD4 naive?
-# * An analysis tool will always try to give you some sort of answer - it's important to think about whether the tool we're using is appropriate for a given dataset
-# * What happens if we left in the NK cells?
+# Having found a good set of clusters, we would usually perform differential expression analysis on the original data and include batches/runs/individuals as predictors in the linear model. In this example we could now compare un-stimulated and stimulated cells within each cluster. A particularly nice statistical approach that is possible here would be to convert the counts to pseudo-bulk data for the eight individuals, and then apply a bulk RNA-Seq differential expression analysis method.
 
 #   **Session Info**
 

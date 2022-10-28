@@ -39,7 +39,7 @@ Should BiocManager ask to update more packages, we recommend choosing not to for
 
 ```{r, eval=FALSE}
 ## Install required packages for Seurat and Monocle:
-install.packages(c("Seurat", "dplyr", "devtools", "R.utils"))
+install.packages(c("Seurat", "harmony", "dplyr", "devtools", "R.utils"))
 
 ## Install Seuratwrapers
 remotes::install_github('satijalab/seurat-wrappers')
@@ -51,7 +51,8 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install(c('SingleR', 'celldex',
                        'BiocGenerics', 'DelayedArray', 'DelayedMatrixStats',
                        'limma', 'S4Vectors', 'SingleCellExperiment',
-                       'SummarizedExperiment', 'batchelor', 'Matrix.utils'))
+                       'SummarizedExperiment', 'batchelor', 'Matrix.utils'),
+                     update=FALSE)
 
 ## Install Monocle
 devtools::install_github('cole-trapnell-lab/leidenbase')
