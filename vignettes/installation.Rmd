@@ -33,38 +33,19 @@ untar("pbmc3k_filtered_gene_bc_matrices.tar.gz")
 
 ## Package Installation
  
-For this workshop, several packages need to be installed. Seurat is relatively easy to install by itself. Monocle however has several dependencies that must be installed first, and these can sometimes be difficult to get all working.
+For this workshop, several packages need to be installed. Seurat is relatively easy to install by itself. 
 
 Should BiocManager ask to update more packages, we recommend choosing not to for your first attempt at installation. If you have a large number of packages that BiocManager wants to update, this can take several hours to update. If however your installation fails, then you might need to update the Bioc packages.
 
 ```{r, eval=FALSE}
-## Install required packages for Seurat and Monocle:
-install.packages(c("Seurat", "dplyr", "devtools", "R.utils"))
+## Install required packages for Seurat
+install.packages(c("dplyr", "Seurat", "harmony"))
 
-## Install Seuratwrapers
-remotes::install_github('satijalab/seurat-wrappers')
-
-## Install required Bioconductor dependencies for Monocle:
+## Install required Bioconductor packages
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 
-BiocManager::install(c('SingleR', 'celldex',
-                       'BiocGenerics', 'DelayedArray', 'DelayedMatrixStats',
-                       'limma', 'S4Vectors', 'SingleCellExperiment',
-                       'SummarizedExperiment', 'batchelor', 'Matrix.utils'))
-
-## Install Monocle
-devtools::install_github('cole-trapnell-lab/leidenbase')
-devtools::install_github('cole-trapnell-lab/monocle3')
+BiocManager::install(c('SingleR', 'celldex'))
 ```
-
-Monocle can be especially fiddly to install. We recommend checking the [Monocle installation page](https://cole-trapnell-lab.github.io/monocle3/docs/installation/) if you encounter the following issues: 
-
-* Errors involving Gdal
-* Errors involving Xcode
-* Errors involving gfortran
-* Errors involving reticulate
-
-If you encounter an error with Github API rate limit, we are in the process of outlining a solution for this.
 
 We suggest attending the MBP help session at 3pm on 10 December for installation problems or using the Slack channel to ask for help.

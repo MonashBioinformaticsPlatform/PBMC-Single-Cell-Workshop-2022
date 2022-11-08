@@ -42,11 +42,29 @@ Please go to the [installation page](https://monashbioinformaticsplatform.github
 
 # Setup the Seurat Object
 
-For this tutorial, we will be analyzing the a dataset of Peripheral Blood Mononuclear Cells (PBMC) freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz).
+For this tutorial, we will be analyzing the a dataset of Peripheral Blood Mononuclear Cells (PBMC) freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz). In this example, the raw data has already been processed through the cellranger pipeline and we are working with the pipeline output.
+
+Cellranger produces three files:
+
+* barcodes.tsv - a text file containing the list of cell barcodes for the sample
+* features.tsv - a text file containing information about the features in the dataset. For this specific dataset, this file instead is called `genes.tsv` as it has been produced by an older version of cellranger. It contains the list of gene annotations the data was counted against. Now since cellranger can be used with different types of experiment (e.g ATAC, hashtag oligos, cell surface proteins) - the word 'feature' is used instead as you might have the hashtag oligo names listed here or peak names
+* matrix.mtx - this sparse matrix encodes the count data. It only includes non-zero data and the first two columns maps to the information contain in the `features.tsv` and the `barcodes.tsv` files. The first three rows in the file contains information about the file type - the type of file it is and the dimensions of data ie the number of features, the number of cells and then the total number of rows containing data in the matrix file (excluding the first rows).
+
+The first column contains the row number of the feature in the `features.tsv` fuke whereas the second column contains the row number for the cell barcode in the `barcodes.tsv` file. It's the third column that contains the UMI count.
+
+```
+32709 1 4
+32707 1 1
+32706 1 10
+32704 1 1
+32703 1 5
+```
+
+The count data is stored in this sparse format with the column and row information stored in seperate files and only the non-zero counts kept. This representation of the data is an efficient way to store the data and most single cell analysis packages will have a way to read such data in and represent it as a matrix.
 
 We start by reading in the data. The `Read10X()` function reads in the output of the [cellranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) pipeline from 10X, returning a unique molecular identified (UMI) count matrix. The values in this matrix represent the number of molecules for each feature (i.e. gene; row) that are detected in each cell (column).
 
-We next use the count matrix to create a `Seurat` object. The object serves as a container that contains both data (like the count matrix) and analysis (like PCA, or clustering results) for a single-cell dataset. For a technical discussion of the `Seurat` object structure, check out the [GitHub Wiki](https://github.com/satijalab/seurat/wiki). For example, the count matrix is stored in `pbmc@assays$RNA@counts`.
+We next use the count matrix to create a `Seurat` object. The object serves as a container that contains both data (like the count matrix) and analysis (like PCA, or clustering results) for a single-cell dataset. For a technical discussion of the `Seurat` object structure, check out the [GitHub Wiki](https://github.com/satijalab/seurat/wiki/Seurat). For example, the count matrix is stored in `pbmc@assays$RNA@counts`.
 
 
 ```{r init}
@@ -56,12 +74,13 @@ library(Seurat)
 library(patchwork)
 
 # Load the PBMC dataset
-pbmc.data <- Read10X(data.dir = "filtered_gene_bc_matrices/hg19/")
+pbmc.data <- Read10X(data.dir = "filtered_gene_bc_matrices/hg19/") # This creates a sparse matrix
 
 # Initialize the Seurat object with the raw (non-normalized data).
 pbmc <- CreateSeuratObject(counts = pbmc.data, project = "pbmc3k", min.cells = 3, min.features = 200)
-pbmc
+pbmc 
 ```
+
 
 <details>
   <summary>**What does data in a count matrix look like?**</summary>
@@ -89,7 +108,7 @@ Lets take a look at the seurat object we have just created in R, `pbmc`
 
 To accomodate the complexity of data arising from a single cell RNA seq experiment, the seurat object keeps this as a container of multiple data tables that are linked.
 
-The functions in seurat can access parts of the data object for analysis and visualisation, we will cover this later on. 
+The functions in Seurat can access parts of the data object for analysis and visualisation, we will cover this later on. 
 
 There are a couple of concepts to discuss here.
 <details>
@@ -97,7 +116,7 @@ There are a couple of concepts to discuss here.
 
 These are essentially data containers in R as a class, and can accessed as a variable in the R environment. 
 
-Classes are pre-defined and can contain multiple data tables and metadata. For Seurat, there are three types. 
+Classes are pre-defined and can contain multiple data tables and metadata. For Seurat, there are several types. 
 
 * Seurat - the main data class, contains all the data.
 * Assay - found within the Seurat object. Depending on the experiment a cell could have data on RNA, ATAC etc measured
@@ -123,13 +142,19 @@ The ways to access the slots can be through methods for the class (functions) or
 
 **Examples of accessing a Seurat object**
 
-The `assays` slot in `pbmc` can be accessed with `pbmc@assays`.
+The `assays` slot in `pbmc` can be accessed with `GetAssay(pbmc)` or `pbmc@assays`.
 
-The `RNA` assay can be accessed from this with `pbmc@assays$RNA`. 
+The `RNA` assay can be accessed from this with `GetAssay(pbmc, assay = "RNA)` or `pbmc@assays$RNA`. 
+
+We can also use the `GetAssayData` function and specify which slot we'd like to extract data.
+
+```{r}
+GetAssayData(object = pbmc, slot = "data")[1:5, 1:5]
+```
 
 We often want to access assays, so Seurat nicely gives us a shortcut `pbmc$RNA`. You may sometimes see an alternative notation `pbmc[["RNA"]]`.
 
-In general, slots that are always in an object are accessed with `@` and things that may be different in different data sets are accessed with `$`.
+In general, slots that are always in an object are accessed with `@` and things that may be different in different data sets are accessed with `$`. 
 
 **Have a go**
 
@@ -139,7 +164,7 @@ What is in the `meta.data` slot within your Seurat object currently? What type o
 
 Where is our count data within the Seurat object? 
 
-
+The PBMC dataset is a gene-expression dataset and is stored in an assay called `RNA`. What other types of assays could we have stored in a Seurat object if we had a different type of dataset?
 
 # Standard pre-processing workflow
 
