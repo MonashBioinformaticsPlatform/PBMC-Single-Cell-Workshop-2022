@@ -26,4 +26,4 @@ Current order of play and nominated instructors (TBC)
 | 3:30 - 4:00       | Single Cell further (SingleR, Harmony content) | Nick            | 30 min             |
 | 4:00 - 4:30       | Q and A links and other things                 | Open            | 30 min             | See how time goes
 
-[Link to workshop page](https://monashbioinformaticsplatform.github.io/Single-Cell-Workshop/)
+[Link to workshop page](https://monashbioinformaticsplatform.github.io/PBMC-Single-Cell-Workshop-2022/)

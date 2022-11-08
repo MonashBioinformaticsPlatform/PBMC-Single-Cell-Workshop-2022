@@ -15,3 +15,6 @@ vignettes/pbmc3k_filtered_gene_bc_matrices.tar.gz
 vignettes/pbmc3k_tutorial.html
 vignettes/pbmc3k_tutorial_times.csv
 vignettes/pbmc3k_umap.jpg
+vignettes/kang2018/
+vignettes/kang2018_preprocessing.html
+vignettes/dimred.html
