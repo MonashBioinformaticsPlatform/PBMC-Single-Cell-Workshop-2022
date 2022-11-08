@@ -19,6 +19,7 @@ Once you've created a new project, run the following R code to download the work
 
 ```{r eval=FALSE}
 # Download files we will be using
+options(timeout=3600)
 filenames <- c("pbmc3k_tutorial.R", "kang2018.rds")
 url <- "https://raw.githubusercontent.com/MonashBioinformaticsPlatform/PBMC-Single-Cell-Workshop-2022/main/vignettes/" 
 for(filename in filenames)

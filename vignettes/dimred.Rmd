@@ -43,7 +43,7 @@ Axes can be hidden using the checkboxes.
 
 Drag over points to highlight them in both plots.
 
-```{r}
+```{r warning=FALSE,message=FALSE}
 ## 2022-11-07 This code requires the development versions of langevitour and plotly.R
 # remotes::install_github("pfh/langevitour")
 # remotes::install_github("plotly/plotly.R")
