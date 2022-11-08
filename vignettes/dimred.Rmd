@@ -1,0 +1,105 @@
+---
+title: "Dimensionality reduction example"
+output:
+    html_document:
+        code_folding: hide
+---
+
+Typical dimensionality reduction steps: 
+
+`1000s of genes --> 10s of Principal Components --> 2 UMAP dimensions`
+
+<br>
+
+Thousands of dimensions are hard to draw, so this simulated example will use 3 genes. 
+
+Assume the genes are already log transformed, centered, and scaled as usual.
+
+<br>
+
+**Principal Components Analysis** finds a new basis for the data. We go from <span style="color: #008800">genes-as-axes</span> to <span style="color: #880000">PCs-as-axes</span>. Each PC has a vector of "gene loadings" (or "feature loadings"). The projection of each cell onto each component is called the "cell score" or "cell embedding".
+
+This is a linear transformation. Straight lines in gene space remain straight lines in PC space.
+
+Principal Components are ordered by how much variation they explain. The first *n* components are the best possible approximation of the data with *n* components, in terms of total squared error. We could simplify the data by discarding the last PC. Try hiding PC3 by unchecking its checkbox.
+
+The most variation does not necessarily mean the most interesting structure. Here PC1 and PC3 actually show more interesting structure. Try hiding PC2 by unchecking its checkbox. This works ok here, but will not work well in general -- biological phenomena of interest may be mixed up across several PCs.
+
+<br>
+
+**UMAP** is good at revealing interesting structure.
+
+UMAP tries to put nearest neighbours in a high dimensional space close to each other in a 2D layout. By using the nearest neighbours graph, it follows of the topology of the data. (Similarly, Louvain clustering uses nearest neighbour connections to find clusters following the topology of the data.)
+
+UMAP is a non-linear transformation, straight lines may become curved or even torn apart.
+
+The UMAP below was computed from all three PCs.
+
+Because I am mean, I found a random example where the UMAP went a bit weird. Can you work out what has happened?
+
+<br>
+
+Axes can be hidden using the checkboxes.
+
+Drag over points to highlight them in both plots.
+
+```{r}
+## 2022-11-07 This code requires the development versions of langevitour and plotly.R
+# remotes::install_github("pfh/langevitour")
+# remotes::install_github("plotly/plotly.R")
+
+library(langevitour)
+library(uwot)
+library(crosstalk)
+library(plotly)
+library(htmltools)
+
+# Simulate some data
+set.seed(563)
+n <- 2000
+mat <- cbind(
+    rnorm(n),
+    rnorm(n),
+    rnorm(n)*0.3 + rep(c(-1,1),n/2))
+
+gene_mat <- mat %*% cbind(
+    gene1 = c(1,1,0),
+    gene2 = c(1,-1,0),
+    gene3 = c(1,0,2))
+
+
+# Get principal components
+pcs <- prcomp(gene_mat)
+
+# Calculate UMAP layout
+layout <- umap(pcs$x, min_dist=0.5)
+
+
+# Object that allows widgets to share selections
+shared <- SharedData$new(as.data.frame(layout))
+
+
+langevitour_widget <- langevitour(
+    gene_mat, 
+    extraAxes=pcs$rotation, 
+    axisColors=rep(c("#008800","#880000"),each=3), 
+    scale=8, pointSize=1, link=shared, 
+    state=list(damping=-1),
+    width="600", height="600")
+
+umap_plot <- ggplot(shared) + 
+    aes(x=V1,y=V2,text="") + 
+    geom_point(size=0.5) + 
+    coord_fixed() +
+    theme_bw() +
+    labs(x="",y="",title="UMAP layout")
+
+umap_widget <- ggplotly(umap_plot, tooltip="text", width=500, height=500) |> 
+    style(unselected=list(marker=list(opacity=1))) |> # Don't double-fade unselected points
+    highlight(on="plotly_selected", off="plotly_deselect")
+
+browsable(div(
+    style="display: grid; grid-template-columns: 1fr 1fr;", 
+    langevitour_widget, umap_widget))
+
+```

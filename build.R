@@ -4,6 +4,7 @@ library(stringr)
 build_html <- function() {
     rmarkdown::render("vignettes/installation.Rmd", output_dir="docs")
     rmarkdown::render("vignettes/solutions.Rmd", output_dir="docs")
+    rmarkdown::render("vignettes/dimred.Rmd", output_dir="docs")
     rmarkdown::render("vignettes/kang2018_preprocessing.Rmd", output_dir="docs")
     rmarkdown::render("vignettes/pbmc3k_tutorial.Rmd", output_dir="docs")
 }

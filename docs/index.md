@@ -13,8 +13,9 @@ This workshop, conducted by the Monash Bioinformatics Platform, will cover how t
 Important links:
 
 * [Installation and Setup instructions](installation.html)
-* [PBMC Workshop material](pbmc3k_tutorial.html/)
+* [PBMC Workshop material](pbmc3k_tutorial.html)
 
+* [Dimensionality reduction example](dimred.html)
 * [Challenge solutions](solutions.html) (no peeking!)
 
 ### Recommended Computer Requirements:
