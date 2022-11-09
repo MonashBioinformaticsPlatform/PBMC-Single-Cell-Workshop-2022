@@ -1,7 +1,7 @@
 # Single Cell RNA Seq Training Seminar
 
 
-Instructors: TBA
+Instructors: Adele Barugahare & Dr Paul Harrison
 
 ## Using Seurat (SingleR and Harmony)
 

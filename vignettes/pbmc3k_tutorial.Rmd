@@ -106,7 +106,8 @@ dense.size / sparse.size
 
 
 #### Discussion: The Seurat Object in R {.challenge}
-Lets take a look at the seurat object we have just created in R, `pbmc`
+
+Lets take a look at the seurat object we have just created in R, `pbmc`.
 
 To accomodate the complexity of data arising from a single cell RNA seq experiment, the seurat object keeps this as a container of multiple data tables that are linked.
 
@@ -154,9 +155,9 @@ We can also use the `GetAssayData` function and specify which slot we'd like to 
 GetAssayData(object = pbmc, slot = "data")[1:5, 1:5]
 ```
 
-We often want to access assays, so Seurat nicely gives us a shortcut `pbmc$RNA`. You may sometimes see an alternative notation `pbmc[["RNA"]]`.
+We often want to access assays, so Seurat gives us a shortcut `pbmc$RNA`. You may sometimes see an alternative notation `pbmc[["RNA"]]`.
 
-In general, slots that are always in an object are accessed with `@` and things that may be different in different data sets are accessed with `$`. 
+In general, slots that are always in an object are accessed with `@` and things that may be different in different data sets are accessed with `$`. However, it generally is safer to access data using the provided functions - if the way the Seurat object is structured changes in a future update, the functions should remain useable whereas code that directly references the Seurat structure with `@` and `$` may no longer run. 
 
 **Have a go**
 
@@ -455,7 +456,7 @@ pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE, min.pct = 0.25, logfc.thre
 pbmc.markers %>% group_by(cluster) %>% slice_max(n = 2, order_by = avg_log2FC)
 ```
 
-Seurat has several tests for differential expression which can be set with the test.use parameter (see the Seurat [differential expression vignette](de_vignette.html) for details). For example, the ROC test returns the 'classification power' `abs(AUC-0.5)*2` for any individual marker, ranging from 0 = random to 1 = perfect.
+Seurat has several tests for differential expression which can be set with the test.use parameter (see the Seurat [differential expression vignette](https://satijalab.org/seurat/articles/de_vignette.html) for details). For example, the ROC test returns the 'classification power' `abs(AUC-0.5)*2` for any individual marker, ranging from 0 = random to 1 = perfect.
 
 ```{r markersroc, fig.height=8, fig.width=15}
 cluster0.markers <- FindMarkers(pbmc, ident.1 = 0, logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
