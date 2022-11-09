@@ -34,6 +34,11 @@ pbmc[["RNA"]]@counts
 
 ## this is the data object in pbmc.data but is now stored within the seurat object
 pbmc@assays$RNA@counts[c("CD3D","TCL1A","MS4A1"), 1:30]
+
+# The PBMC dataset is a gene-expression dataset and is stored in an assay called `RNA`. What other types of assays could we have stored in a Seurat object if we had a different type of dataset?
+# We could have a ATAC assay if we had done single cell ATAC
+# We could have a HTO assay if we'd done cell hashtagging
+# We could have a CSP assay if we captured cell surface protein data
 ```
 
 

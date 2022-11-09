@@ -43,10 +43,7 @@ BiocManager likes to update installed packages, but we have disabled this in the
 ## Install required packages for Seurat and Monocle:
 install.packages(c("Seurat", "harmony", "dplyr", "remotes", "R.utils"))
 
-## Install Seuratwrapers
-remotes::install_github('satijalab/seurat-wrappers')
-
-## Install required Bioconductor dependencies for Monocle:
+## Install required Bioconductor packages
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 

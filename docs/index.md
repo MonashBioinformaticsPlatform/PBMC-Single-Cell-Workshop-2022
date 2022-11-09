@@ -1,14 +1,11 @@
 # Single Cell RNA Seq Training Seminar
 
-In partnership with 10X Genomics
 
-Monday and Tuesday, 1st and 3rd of March
+Instructors: TBA
 
-Instructors: Dr David Powell, Dr Paul Harrison, Dr Nick Wong, Dr Dee Deveson-Lucas, Nitika Kandhari, Peinan Zhao, Patrick Deng
+## Using Seurat (SingleR and Harmony)
 
-## Day Two: Using Seurat (SingleR and Monocle)
-
-This workshop, conducted by the Monash Bioinformatics Platform, will cover how to extend analysis to contemporary third-party tools, Seurat and Monocle. We will be walking through the 3K PBMC Dataset Tutorial and extend this to Monocle with some trajectory analysis.
+This workshop, conducted by the Monash Bioinformatics Platform, will cover how to extend analysis to contemporary third-party tools, Seurat, Harmony and SingleR. We will be walking through the Seurat 3K PBMC Dataset Tutorial and extend this to and SingleR & Harmony for cell annotation and dataset integration.
 
 Important links:
 
