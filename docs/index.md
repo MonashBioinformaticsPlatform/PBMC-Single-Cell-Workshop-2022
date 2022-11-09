@@ -13,6 +13,8 @@ Important links:
 * [PBMC Workshop material](pbmc3k_tutorial.html)
 
 * [Dimensionality reduction example](dimred.html)
+* [Interactive widgets demo](interact.html)
+
 * [Challenge solutions](solutions.html) (no peeking!)
 
 ### Recommended Computer Requirements:

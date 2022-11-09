@@ -387,10 +387,7 @@ packages that BiocManager wants to update it can take several hours.</p>
 <pre class="r"><code>## Install required packages for Seurat and Monocle:
 install.packages(c(&quot;Seurat&quot;, &quot;harmony&quot;, &quot;dplyr&quot;, &quot;remotes&quot;, &quot;R.utils&quot;))
 
-## Install Seuratwrapers
-remotes::install_github(&#39;satijalab/seurat-wrappers&#39;)
-
-## Install required Bioconductor dependencies for Monocle:
+## Install required Bioconductor packages
 if (!requireNamespace(&quot;BiocManager&quot;, quietly = TRUE))
   install.packages(&quot;BiocManager&quot;)
 

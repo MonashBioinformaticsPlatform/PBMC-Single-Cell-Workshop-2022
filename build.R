@@ -1,12 +1,18 @@
 
 library(stringr)
 
+# Always produces slightly different RDS output.
+# We won't run this routinely.
+build_kang <- function() {
+    rmarkdown::render("vignettes/kang2018_preprocessing.Rmd", output_dir="docs")
+}
+
 build_html <- function() {
     rmarkdown::render("vignettes/installation.Rmd", output_dir="docs")
     rmarkdown::render("vignettes/solutions.Rmd", output_dir="docs")
     rmarkdown::render("vignettes/dimred.Rmd", output_dir="docs")
-    rmarkdown::render("vignettes/kang2018_preprocessing.Rmd", output_dir="docs")
     rmarkdown::render("vignettes/pbmc3k_tutorial.Rmd", output_dir="docs")
+    rmarkdown::render("vignettes/interact.Rmd", output_dir="docs")
 }
 
 build_r <- function() {
