@@ -1,0 +1,124 @@
+---
+title: "Interacting with scRNA-Seq data"
+output:
+  html_document:
+    theme: united
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+<style>
+.main-container {
+    margin-left: 50px;
+    margin-right: 50px;
+    max-width: 2000px;
+}
+</style>
+
+There are a wide range of packages for working for scRNA-Seq data in R, but it sometimes feels like we are working with the data at arm's length. In this vignette, I would like to demonstrate some interactive features spanning several R packages that allow more direct engagement with data using HTML widgets. My selfish hope is that more people will use these features, and in the process work out some of the rough edges and develop more tools in this space.
+
+The key package I want to demonstrate is [crosstalk](https://rstudio.github.io/crosstalk/) which allows selections and filters to be shared between widgets. A number of packages support `crosstalk`, notably including [plotly](https://github.com/plotly/plotly.R) for plots and [DT](https://rstudio.github.io/DT/) for tables. I will also demonstrate my own [langevitour](https://logarithmic.net/langevitour/) package for exploring high-dimensional data.
+
+These widgets work in a **static HTML page**, which can be created using [rmarkdown](https://rmarkdown.rstudio.com/) and shared as a file with collaborators or put on the web. A [shiny](https://shiny.rstudio.com/) server is not required.
+
+```{r message=FALSE,warning=FALSE}
+## 2022-11-07 This code requires the development versions of langevitour and plotly.R
+# remotes::install_github("pfh/langevitour")
+# remotes::install_github("plotly/plotly.R")
+
+library(Seurat)
+library(ggbeeswarm)
+library(crosstalk)    # SharedData objects sllow widgets to share selections and filters
+library(ggplot2)      # Can use SharedData object in place of data frame
+library(plotly)       # Can convert ggplots into widgets
+library(DT)           # Table widget, can use SharedData object
+library(langevitour)  # Tour high-dimensional data, can link with SharedData object 
+library(htmltools)    # Create HTML, lay out widgets
+
+# Use the Seurat object created during the workshop
+pbmc <- readRDS("pbmc3k_final.rds")
+
+
+# plotly's crosstalk implementation requires a little tweaking to work right.
+plotlify <- function(plot) {
+    ggplotly(plot, tooltip="text") |> 
+        style(unselected=list(marker=list(opacity=1))) |> # Don't double-fade unselected points
+        highlight(on="plotly_selected", off="plotly_deselect")
+}
+
+# A data frame with the data for most of the widgets we will show
+df <- cbind(
+        pbmc@meta.data[,c("nCount_RNA","nFeature_RNA","percent.mt")], 
+        ident=Idents(pbmc), 
+        pbmc$umap@cell.embeddings)
+ 
+# Turning a data frame into a crosstalk SharedData object allows widgets to communicate
+shared <- SharedData$new(df)
+
+
+# The SharedData object is used instead of the data frame
+p_count <- ggplot(shared) + 
+    aes(x="PBMC", y=nCount_RNA) + 
+    geom_beeswarm(size=0.5, cex=0.75) + 
+    labs(x="")
+
+p_feature <- ggplot(shared) + 
+    aes(x="PBMC", y=nFeature_RNA) + 
+    geom_beeswarm(size=0.5, cex=0.75) + 
+    labs(x="")
+
+p_mt <- ggplot(shared) + 
+    aes(x="PBMC", y=percent.mt) + 
+    geom_beeswarm(size=0.5, cex=0.75) + 
+    labs(x="")
+
+colors <- scales::hue_pal()(9)
+
+p_umap <- ggplot(shared) + 
+    aes(x=UMAP_1, y=UMAP_2, color=ident) + 
+    geom_point(size=0.5) + 
+    scale_color_manual(values=colors) + 
+    coord_fixed()
+
+# A table widget, again using the SharedData object
+w_table <- datatable(
+    shared,
+    width="100%", class='compact cell-border hover', extensions='Buttons',
+    options=list(dom='Bfrtip',buttons=c('copy','csv','excel')))
+
+# A high-dimensional tour widget
+w_langevitour <- langevitour(
+    pbmc$pca@cell.embeddings[,1:8], Idents(pbmc), 
+    levelColors=colors, pointSize=1.5, link=shared,
+    width=800, height=500)
+
+f_counts <- filter_slider("f_counts", "nCount_RNA filter", shared, "nCount_RNA") 
+
+# Arrange everything in a nice layout using HTML
+browsable(div(
+    f_counts,
+    div(style="display: grid; grid-template-columns: 150px 150px 150px 500px;", 
+        plotlify(p_count), 
+        plotlify(p_feature), 
+        plotlify(p_mt),
+        plotlify(p_umap)),
+    w_langevitour,
+    w_table))
+```
+
+Things to try:
+
+* Select by dragging in any of the plots.
+* Select by clicking and shift-clicking rows in the table.
+* Download the selected cells using the buttons above the table.
+* Adjust the filter slider. Cells disappear from all widgets.
+* Untick groups in the langevitour widget. Cells disappear from all widgets.
+* Set the "guide" to "local".
+
+Things to notice:
+
+* High count cells end up on a particular side of each cluster in the UMAP. We might wonder if this is real biology or an artifact of our normalization steps.
+
+* DC cells form a small protrusion in the UMAP, but they are spread out in PC space. A feature of UMAP is that it erases differences in how spread out each cluster is.
+
+* Platelets are very far from all other clusters in PC space. UMAP has also hidden this.

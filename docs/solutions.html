@@ -1502,7 +1502,7 @@ border-radius: 0px;
 
 
 <h1 class="title toc-ignore">Solutions to challenges</h1>
-<h4 class="date">Compiled: November 08, 2022</h4>
+<h4 class="date">Compiled: November 09, 2022</h4>
 
 </div>
 
@@ -1526,7 +1526,12 @@ pbmc$RNA@counts
 pbmc[[&quot;RNA&quot;]]@counts
 
 ## this is the data object in pbmc.data but is now stored within the seurat object
-pbmc@assays$RNA@counts[c(&quot;CD3D&quot;,&quot;TCL1A&quot;,&quot;MS4A1&quot;), 1:30]</code></pre>
+pbmc@assays$RNA@counts[c(&quot;CD3D&quot;,&quot;TCL1A&quot;,&quot;MS4A1&quot;), 1:30]
+
+# The PBMC dataset is a gene-expression dataset and is stored in an assay called `RNA`. What other types of assays could we have stored in a Seurat object if we had a different type of dataset?
+# We could have a ATAC assay if we had done single cell ATAC
+# We could have a HTO assay if we&#39;d done cell hashtagging
+# We could have a CSP assay if we captured cell surface protein data</code></pre>
 </div>
 <div id="challenge-the-meta.data-slot-in-the-seurat-object" class="section level2">
 <h2>Challenge: The meta.data slot in the Seurat object</h2>

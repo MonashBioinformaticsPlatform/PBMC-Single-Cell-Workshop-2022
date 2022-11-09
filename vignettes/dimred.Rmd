@@ -2,12 +2,23 @@
 title: "Dimensionality reduction example"
 output:
     html_document:
+        theme: united
         code_folding: hide
 ---
 
+<style>
+.main-container {
+    margin-left: 50px;
+    margin-right: 50px;
+    max-width: 2000px;
+}
+</style>
+
+<div style="font-size: 150%">
 Typical dimensionality reduction steps: 
 
-`1000s of genes --> 10s of Principal Components --> 2 UMAP dimensions`
+1000s of genes &rarr; 10s of Principal Components &rarr; 2 UMAP dimensions
+</div>
 
 <br>
 
@@ -17,11 +28,11 @@ Assume the genes are already log transformed, centered, and scaled as usual.
 
 <br>
 
-**Principal Components Analysis** finds a new basis for the data. We go from <span style="color: #008800">genes-as-axes</span> to <span style="color: #880000">PCs-as-axes</span>. Each PC has a vector of "gene loadings" (or "feature loadings"). The projection of each cell onto each component is called the "cell score" or "cell embedding".
+**Principal Components Analysis** finds a new basis for the data. We go from <span style="color: #008800">genes-as-axes</span> to <span style="color: #880000">PCs-as-axes</span>. Each PC axis is defined by a vector of "gene loadings" (or "feature loadings"). The projection of each cell onto each PC is called the "cell score" or "cell embedding".
 
-This is a linear transformation. Straight lines in gene space remain straight lines in PC space.
+This is a linear transformation. In fact it is a rotation. Straight lines in gene space remain straight lines in PC space.
 
-Principal Components are ordered by how much variation they explain. The first *n* components are the best possible approximation of the data with *n* components, in terms of total squared error. We could simplify the data by discarding the last PC. Try hiding PC3 by unchecking its checkbox.
+Principal Components are ordered by how much variation they explain. The first *n* components are the best possible approximation of the data with *n* components, in terms of total squared error. We can simplify the data by discarding all but the first few PCs. Here, try hiding PC3 by unchecking its checkbox.
 
 The most variation does not necessarily mean the most interesting structure. Here PC1 and PC3 actually show more interesting structure. Try hiding PC2 by unchecking its checkbox. This works ok here, but will not work well in general -- biological phenomena of interest may be mixed up across several PCs.
 
@@ -29,19 +40,18 @@ The most variation does not necessarily mean the most interesting structure. Her
 
 **UMAP** is good at revealing interesting structure.
 
-UMAP tries to put nearest neighbours in a high dimensional space close to each other in a 2D layout. By using the nearest neighbours graph, it follows of the topology of the data. (Similarly, Louvain clustering uses nearest neighbour connections to find clusters following the topology of the data.)
+UMAP tries to put nearest neighbours in a high dimensional space close to each other in a 2D layout. By using the nearest neighbours graph, it follows the topology of the data.
 
 UMAP is a non-linear transformation, straight lines may become curved or even torn apart.
 
-The UMAP below was computed from all three PCs.
-
-Because I am mean, I found a random example where the UMAP went a bit weird. Can you work out what has happened?
+The UMAP below was computed from all three PCs. Because I am mean, I found an example where the UMAP went a bit weird. Can you work out what has happened?
 
 <br>
 
-Axes can be hidden using the checkboxes.
+Using these widgets:
 
-Drag over points to highlight them in both plots.
+* An axis can be hidden using the checkboxes.
+* Drag over points to highlight them in both plots.
 
 ```{r warning=FALSE,message=FALSE}
 ## 2022-11-07 This code requires the development versions of langevitour and plotly.R
@@ -103,3 +113,16 @@ browsable(div(
     langevitour_widget, umap_widget))
 
 ```
+
+# About nearest neighbours graphs
+
+The UMAP layout is based on the nearest neighbour graph. For each cell the (default) 30 nearest neighbours are found (`n.neighbors` parameter in `RunUMAP`). This tends to capture the topology of shapes in high-dimensional space. It also adapts to how dense clusters are so, as a feature, UMAP erases differences in cluster density. All the points within clusters will be packed together with about the same density (`min.dist` parameter in `RunUMAP`).
+
+Similarly, graph-based clustering methods such as Louvain clustering use nearest neighbour connections to find clusters following the topology of the data. Notice in the two clusters above there are pairs of points within a cluster that are further apart than some pairs of points between the two different clusters. A purely distance-based clustering method such as k-means would perform poorly here. 
+
+Louvain clustering can handle clusters with complex curved shapes, and clusters of different size and density.
+
+Further reading:
+
+* [Understanding UMAP](https://pair-code.github.io/understanding-umap/)
+
