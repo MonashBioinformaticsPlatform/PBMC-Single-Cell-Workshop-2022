@@ -43,8 +43,9 @@ BiocManager likes to update installed packages, but we have disabled this in the
 ## Install required packages for Seurat:
 install.packages(c("Seurat", "dplyr", "remotes", "R.utils"))
 
-# 2022-10-30 Harmony failed checks on CRAN. Use dev version for now.
-remotes::install_github("immunogenomics/harmony")
+# 2022-10-30 Harmony failed checks on CRAN. Need to use some old versions for now.
+remotes::install_version("RcppArmadillo", version="0.11.2.4.0")
+remotes::install_version("harmony", version="0.1", upgrade="never")
 
 ## Install required Bioconductor packages
 if (!requireNamespace("BiocManager", quietly = TRUE))
