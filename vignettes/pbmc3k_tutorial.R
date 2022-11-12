@@ -16,7 +16,7 @@
 # * features.tsv - a text file containing information about the features in the dataset. For this specific dataset, this file instead is called genes.tsv as it has been produced by an older version of cellranger. It contains the list of gene annotations the data was counted against. Now since cellranger can be used with different types of experiment (e.g ATAC, hashtag oligos, cell surface proteins) - the word 'feature' is used instead as you might have the hashtag oligo names listed here or peak names
 # * matrix.mtx - this sparse matrix encodes the count data. It only includes non-zero data and the first two columns maps to the information contain in the features.tsv and the barcodes.tsv files. The first three rows in the file contains information about the file type - the type of file it is and the dimensions of data ie the number of features, the number of cells and then the total number of rows containing data in the matrix file (excluding the first rows).
 
-# The first column contains the row number of the feature in the features.tsv fuke whereas the second column contains the row number for the cell barcode in the barcodes.tsv file. It's the third column that contains the UMI count.
+# The first column contains the row number of the feature in the features.tsv file whereas the second column contains the row number for the cell barcode in the barcodes.tsv file. It's the third column that contains the UMI count.
 
 32709 1 4
 32707 1 1
@@ -24,7 +24,7 @@
 32704 1 1
 32703 1 5
 
-# The count data is stored in this sparse format with the column and row information stored in seperate files and only the non-zero counts kept. This representation of the data is an efficient way to store the data and most single cell analysis packages will have a way to read such data in and represent it as a matrix.
+# The count data is stored in this sparse format with the column and row information stored in separate files and only the non-zero counts kept. This representation of the data is an efficient way to store the data and most single cell analysis packages will have a way to read such data in and represent it as a matrix.
 
 # We start by reading in the data. The Read10X() function reads in the output of the [cellranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) pipeline from 10X, returning a unique molecular identified (UMI) count matrix. The values in this matrix represent the number of molecules for each feature (i.e. gene; row) that are detected in each cell (column).
 
@@ -58,7 +58,7 @@ dense.size / sparse.size
 
 #### Discussion: The Seurat Object in R --------
 
-# Lets take a look at the seurat object we have just created in R, pbmc
+# Lets take a look at the seurat object we have just created in R, pbmc.
 
 # To accomodate the complexity of data arising from a single cell RNA seq experiment, the seurat object keeps this as a container of multiple data tables that are linked.
 
@@ -96,9 +96,9 @@ dense.size / sparse.size
 
 GetAssayData(object = pbmc, slot = "data")[1:5, 1:5]
 
-# We often want to access assays, so Seurat nicely gives us a shortcut pbmc$RNA. You may sometimes see an alternative notation pbmc[["RNA"]].
+# We often want to access assays, so Seurat gives us a shortcut pbmc$RNA. You may sometimes see an alternative notation pbmc[["RNA"]].
 
-# In general, slots that are always in an object are accessed with @ and things that may be different in different data sets are accessed with $.
+# In general, slots that are always in an object are accessed with @ and things that may be different in different data sets are accessed with $. However, it generally is safer to access data using the provided functions - if the way the Seurat object is structured changes in a future update, the functions should remain useable whereas code that directly references the Seurat structure with @ and $ may no longer run.
 
 # **Have a go**
 
@@ -355,7 +355,7 @@ head(cluster5.markers, n = 5)
 pbmc.markers <- FindAllMarkers(pbmc, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 pbmc.markers %>% group_by(cluster) %>% slice_max(n = 2, order_by = avg_log2FC)
 
-# Seurat has several tests for differential expression which can be set with the test.use parameter (see the Seurat [differential expression vignette](de_vignette.html) for details). For example, the ROC test returns the 'classification power' abs(AUC-0.5)*2 for any individual marker, ranging from 0 = random to 1 = perfect.
+# Seurat has several tests for differential expression which can be set with the test.use parameter (see the Seurat [differential expression vignette](https://satijalab.org/seurat/articles/de_vignette.html) for details). For example, the ROC test returns the 'classification power' abs(AUC-0.5)*2 for any individual marker, ranging from 0 = random to 1 = perfect.
 
 cluster0.markers <- FindMarkers(pbmc, ident.1 = 0, logfc.threshold = 0.25, test.use = "roc", only.pos = TRUE)
 
@@ -460,7 +460,7 @@ DimPlot(pbmc, reduction='umap', group.by='SingleR.labels')
 
 # For the purpose of clustering and cell identification, we would like to remove such effects.
 
-# We will now look at [GSE96583](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE96583). For speed, we will be looking at a subset of 5000 cells from this data. The cells in this dataset were pooled from eight individual donors. A nice feature is that genetic differences allow some of the cell doublets to be identified. This data contains two batches of single cell sequencing. One of the batches was stimulated with IFN-beta.
+# We will now look at [GSE96583](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE96583), another PBMC dataset. For speed, we will be looking at a subset of 5000 cells from this data. The cells in this dataset were pooled from eight individual donors. A nice feature is that genetic differences allow some of the cell doublets to be identified. This data contains two batches of single cell sequencing. One of the batches was stimulated with IFN-beta.
 
 # The data has already been processed as we have done with the first PBMC dataset, and can be loaded from kang2018.rds.
 
@@ -507,6 +507,7 @@ kang <- FindNeighbors(kang, reduction="harmony", dims=1:10)
 kang <- FindClusters(kang, resolution=0.25)
 kang$harmony_clusters <- kang$seurat_clusters
 
+DimPlot(kang, reduction="umap_harmony", group.by="harmony_clusters")
 DimPlot(kang, reduction="umap", group.by="harmony_clusters")
 
 # Having found a good set of clusters, we would usually perform differential expression analysis on the original data and include batches/runs/individuals as predictors in the linear model. In this example we could now compare un-stimulated and stimulated cells within each cluster. A particularly nice statistical approach that is possible here would be to convert the counts to pseudo-bulk data for the eight individuals, and then apply a bulk RNA-Seq differential expression analysis method.
