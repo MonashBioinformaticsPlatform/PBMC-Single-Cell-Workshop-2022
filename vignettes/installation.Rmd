@@ -60,3 +60,54 @@ BiocManager::install(c('SingleR', 'celldex',
 remotes::install_github("plotly/plotly.R")
 remotes::install_github("pfh/langevitour")
 ```
+
+
+Troubleshooting installation on M1 Mac with R.4.2:
+
+1. Do not install any packages from source - select `no` when asked.
+
+2. Additional packages to install to load Seurat & Harmony:
+
+```{r, eval=FALSE}
+install.packages(c("rgeos", "spatstat.core", "RcppEigen", "RcppArmadillo"))
+```
+
+3. Harmony will not install and returns an error that looks like something like this:
+
+```
+ld: warning: directory not found for option '-L/opt/R/arm64/gfortran/lib/gcc/aarch64-apple-darwin20.6.0/12.0.1'
+ld: library not found for -lemutls_w
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make: *** [harmony.so] Error 1
+ERROR: compilation failed for package ‘harmony’
+* removing ‘/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/harmony’
+Warning message:
+In i.p(...) :
+  installation of package ‘/var/folders/1k/bbv_y78s4zj0m29mb6fwj3km69dgdb/T//Rtmp9jOOMQ/file83ee3a886f7c/harmony_0.1.1.tar.gz’ had non-zero exit status
+```
+
+Solution: install [GNU Fortran compiler](https://mac.r-project.org/tools/). Following the instructions for that link in regards to Apple Silicon Macs (M1 and above):
+
+i. Download the experimental branch of GNU Fortran (run the code below in your terminal)
+
+```{bash, eval=FALSE}
+wget https://mac.r-project.org/tools/gfortran-12.0.1-20220312-is-darwin20-arm64.tar.xz
+```
+
+ii. This binary unpacks into /opt/R/arm64/gfortran plus a symbolic link in /opt/R/arm64/bin/gfortran. To unpack use:
+```{bash, eval=FALSE}
+tar fxz gfortran-12.0.1-20220312-is-darwin20-arm64.tar.xz -C /
+```
+If this fails because you do not have permission, run it with sudo as so:
+
+```{bash, eval=FALSE}
+sudo tar fxz gfortran-12.0.1-20220312-is-darwin20-arm64.tar.xz -C /
+```
+It will ask for a password - this should be the same password as your user account. 
+
+iii. Install harmony with devtools:
+
+```{r, eval=FALSE}
+install.packages("devtools")
+devtools::install_github("immunogenomics/harmony")
+```
