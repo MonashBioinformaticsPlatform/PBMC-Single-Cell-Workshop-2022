@@ -52,7 +52,7 @@ Cellranger produces three files:
 * features.tsv - a text file containing information about the features in the dataset. For this specific dataset, this file instead is called `genes.tsv` as it has been produced by an older version of cellranger. It contains the list of gene annotations the data was counted against. Now since cellranger can be used with different types of experiment (e.g ATAC, hashtag oligos, cell surface proteins) - the word 'feature' is used instead as you might have the hashtag oligo names listed here or peak names
 * matrix.mtx - this sparse matrix encodes the count data. It only includes non-zero data and the first two columns maps to the information contain in the `features.tsv` and the `barcodes.tsv` files. The first three rows in the file contains information about the file type - the type of file it is and the dimensions of data ie the number of features, the number of cells and then the total number of rows containing data in the matrix file (excluding the first rows).
 
-The first column contains the row number of the feature in the `features.tsv` fuke whereas the second column contains the row number for the cell barcode in the `barcodes.tsv` file. It's the third column that contains the UMI count.
+The first column contains the row number of the feature in the `features.tsv` file whereas the second column contains the row number for the cell barcode in the `barcodes.tsv` file. It's the third column that contains the UMI count.
 
 ```
 32709 1 4
@@ -62,7 +62,7 @@ The first column contains the row number of the feature in the `features.tsv` fu
 32703 1 5
 ```
 
-The count data is stored in this sparse format with the column and row information stored in seperate files and only the non-zero counts kept. This representation of the data is an efficient way to store the data and most single cell analysis packages will have a way to read such data in and represent it as a matrix.
+The count data is stored in this sparse format with the column and row information stored in separate files and only the non-zero counts kept. This representation of the data is an efficient way to store the data and most single cell analysis packages will have a way to read such data in and represent it as a matrix.
 
 We start by reading in the data. The `Read10X()` function reads in the output of the [cellranger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) pipeline from 10X, returning a unique molecular identified (UMI) count matrix. The values in this matrix represent the number of molecules for each feature (i.e. gene; row) that are detected in each cell (column).
 
