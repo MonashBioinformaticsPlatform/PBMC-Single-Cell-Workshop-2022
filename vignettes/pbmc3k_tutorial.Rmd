@@ -587,8 +587,8 @@ pred.cnts <- SingleR::SingleR(test = sce, ref = ref.set, labels = ref.set$label.
 Keep any types that have more than 10 cells to the label, and put those labels back on our Seurat object and plot our on our umap.
 
 ```{r}
-lbls.keep <- table(pred.cnts$first.labels)>10
-pbmc$SingleR.labels <- ifelse(lbls.keep[pred.cnts$first.labels], pred.cnts$first.labels, 'Other')
+lbls.keep <- table(pred.cnts$labels)>10
+pbmc$SingleR.labels <- ifelse(lbls.keep[pred.cnts$labels], pred.cnts$labels, 'Other')
 DimPlot(pbmc, reduction='umap', group.by='SingleR.labels')
 ```
 

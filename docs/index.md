@@ -57,7 +57,7 @@ Install latest versions of:
 ### Useful links arising from the discussion during the workshop
 *	[10x Genomics link to ribosomal protein expression](https://kb.10xgenomics.com/hc/en-us/articles/218169723-What-fraction-of-reads-map-to-ribosomal-proteins-)
 *	[10x Genomics link to mitochondrial gene expression](https://kb.10xgenomics.com/hc/en-us/articles/360001086611-Why-do-I-see-a-high-level-of-mitochondrial-gene-expression-)
-*   [scRNA Tools, catelogue of tools for scRNA Seq analysis](https://www.scrna-tools.org/)
+*   [scRNA Tools, catalogue of tools for scRNA Seq analysis](https://www.scrna-tools.org/)
 #### Data interpretation
 *	[Interactive website explaining UMAP and comparision to t-SNE.](https://pair-code.github.io/understanding-umap/)
 *	[OSCA, dimensionality reduction interpretation](http://bioconductor.org/books/3.14/OSCA.basic/dimensionality-reduction.html#visualization-interpretation)
