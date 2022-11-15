@@ -28,7 +28,7 @@ These widgets work in a **static HTML page**, which can be created using [rmarkd
 
 library(Seurat)
 library(ggbeeswarm)
-library(crosstalk)    # SharedData objects sllow widgets to share selections and filters
+library(crosstalk)    # SharedData objects allow widgets to share selections and filters
 library(ggplot2)      # Can use SharedData object in place of data frame
 library(plotly)       # Can convert ggplots into widgets
 library(DT)           # Table widget, can use SharedData object

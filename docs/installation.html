@@ -363,14 +363,14 @@ display: none;
 the files for this workshop are placed in their own folder.</p>
 <p>Once you’ve created a new project, run the following R code to
 download the workshop material and dataset:</p>
-<pre class="r"><code># Download files we will be using
+<pre class="r"><code>## Download files we will be using
 options(timeout=3600)
 filenames &lt;- c(&quot;pbmc3k_tutorial.R&quot;, &quot;kang2018.rds&quot;)
 url &lt;- &quot;https://raw.githubusercontent.com/MonashBioinformaticsPlatform/PBMC-Single-Cell-Workshop-2022/main/vignettes/&quot; 
 for(filename in filenames)
     download.file(paste0(url,filename), filename)
 
-# Download and untar the raw data
+## Download and untar the raw data
 download.file(
     &quot;http://10x.files.s3-us-west-2.amazonaws.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz&quot;,
     &quot;pbmc3k_filtered_gene_bc_matrices.tar.gz&quot;)
@@ -384,13 +384,17 @@ untar(&quot;pbmc3k_filtered_gene_bc_matrices.tar.gz&quot;)</code></pre>
 this in the R code below. If your installation fails, then you might
 need to turn updates on. Note that if there are a large number of
 packages that BiocManager wants to update it can take several hours.</p>
-<pre class="r"><code>## Install required packages for Seurat and Monocle:
-install.packages(c(&quot;Seurat&quot;, &quot;harmony&quot;, &quot;dplyr&quot;, &quot;remotes&quot;, &quot;R.utils&quot;))
+<p>These instructions have been tested with R version 4.2.1 and
+Bioconductor version 3.16.</p>
+<pre class="r"><code>## Install required packages for Seurat:
+install.packages(c(&quot;Seurat&quot;, &quot;dplyr&quot;, &quot;remotes&quot;, &quot;R.utils&quot;))
+
+# 2022-10-30 Harmony failed checks on CRAN. Need to use some old versions for now.
+remotes::install_version(&quot;RcppArmadillo&quot;, version=&quot;0.11.2.4.0&quot;)
+remotes::install_version(&quot;harmony&quot;, version=&quot;0.1&quot;, upgrade=&quot;never&quot;)
 
 ## Install required Bioconductor packages
-if (!requireNamespace(&quot;BiocManager&quot;, quietly = TRUE))
-  install.packages(&quot;BiocManager&quot;)
-
+install.packages(&quot;BiocManager&quot;)
 BiocManager::install(c(&#39;SingleR&#39;, &#39;celldex&#39;,
                        &#39;BiocGenerics&#39;, &#39;DelayedArray&#39;, &#39;DelayedMatrixStats&#39;,
                        &#39;limma&#39;, &#39;S4Vectors&#39;, &#39;SingleCellExperiment&#39;,
@@ -400,6 +404,50 @@ BiocManager::install(c(&#39;SingleR&#39;, &#39;celldex&#39;,
 ## Install dev versions of some interactive graphics packages
 remotes::install_github(&quot;plotly/plotly.R&quot;)
 remotes::install_github(&quot;pfh/langevitour&quot;)</code></pre>
+<p>Troubleshooting installation on M1 Mac with R.4.2:</p>
+<ol style="list-style-type: decimal">
+<li><p>Do not install any packages from source - select <code>no</code>
+when asked.</p></li>
+<li><p>Additional packages to install to load Seurat &amp;
+Harmony:</p></li>
+</ol>
+<pre class="r"><code>install.packages(c(&quot;rgeos&quot;, &quot;spatstat.core&quot;, &quot;RcppEigen&quot;, &quot;RcppArmadillo&quot;))</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Harmony will not install and returns an error that looks like
+something like this:</li>
+</ol>
+<pre><code>ld: warning: directory not found for option &#39;-L/opt/R/arm64/gfortran/lib/gcc/aarch64-apple-darwin20.6.0/12.0.1&#39;
+ld: library not found for -lemutls_w
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+make: *** [harmony.so] Error 1
+ERROR: compilation failed for package ‘harmony’
+* removing ‘/Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/harmony’
+Warning message:
+In i.p(...) :
+  installation of package ‘/var/folders/1k/bbv_y78s4zj0m29mb6fwj3km69dgdb/T//Rtmp9jOOMQ/file83ee3a886f7c/harmony_0.1.1.tar.gz’ had non-zero exit status</code></pre>
+<p>Solution: install <a href="https://mac.r-project.org/tools/">GNU
+Fortran compiler</a>. Following the instructions for that link in
+regards to Apple Silicon Macs (M1 and above):</p>
+<ol style="list-style-type: lower-roman">
+<li>Download the experimental branch of GNU Fortran (run the code below
+in your terminal)</li>
+</ol>
+<pre class="bash"><code>wget https://mac.r-project.org/tools/gfortran-12.0.1-20220312-is-darwin20-arm64.tar.xz</code></pre>
+<ol start="2" style="list-style-type: lower-roman">
+<li>This binary unpacks into /opt/R/arm64/gfortran plus a symbolic link
+in /opt/R/arm64/bin/gfortran. To unpack use:</li>
+</ol>
+<pre class="bash"><code>tar fxz gfortran-12.0.1-20220312-is-darwin20-arm64.tar.xz -C /</code></pre>
+<p>If this fails because you do not have permission, run it with sudo as
+so:</p>
+<pre class="bash"><code>sudo tar fxz gfortran-12.0.1-20220312-is-darwin20-arm64.tar.xz -C /</code></pre>
+<p>It will ask for a password - this should be the same password as your
+user account.</p>
+<ol start="3" style="list-style-type: lower-roman">
+<li>Install harmony with devtools:</li>
+</ol>
+<pre class="r"><code>install.packages(&quot;devtools&quot;)
+devtools::install_github(&quot;immunogenomics/harmony&quot;)</code></pre>
 </div>
 
 
