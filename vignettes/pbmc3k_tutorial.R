@@ -3,7 +3,7 @@
 
 # Please go to the [installation page](https://monashbioinformaticsplatform.github.io/Single-Cell-Workshop/installation.html) for instructions on how to install the libraries used for this workshop. There are also instructions for downloading the [raw data](http://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz) there as well.
 
-# [The workshop homepage is here](https://monashbioinformaticsplatform.github.io/Single-Cell-Workshop/)
+# [The workshop homepage is here](https://monashbioinformaticsplatform.github.io/PBMC-Single-Cell-Workshop-2022/index.html)
 
 
 # Setup the Seurat Object --------
