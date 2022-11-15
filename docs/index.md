@@ -1,7 +1,7 @@
 # Single Cell RNA Seq Training Seminar
 
 
-Instructors: Adele Barugahare & Dr Paul Harrison
+Instructors: Adele Barugahare & Dr Paul Harrison & Dr Laura Perlaza-Jimenez
 
 ## Using Seurat (SingleR and Harmony)
 
@@ -16,6 +16,7 @@ Important links:
 * [Interactive widgets demo](interact.html)
 
 * [Challenge solutions](solutions.html) (no peeking!)
+* [M1 MacOS installation instructions - only use these if you have an M1 Mac](macos_installation.html)
 
 ### Recommended Computer Requirements:
 
@@ -43,6 +44,11 @@ Install latest versions of:
 
 *Venue:* Virtual workshop conducted via Zoom with breakout rooms. Zoom links will be provided after registration is complete.
 
+### Acknowledgements
+
+This material is mostly based on the [Seurat introductory tutorial.](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html)
+
+It also draws from material for a [workshop provided by QCIF](https://swbioinf.github.io/scRNAseqInR_Doco/index.html) developed by Sarah Williams and Ahmed Mehdi for the Australian Biocommons.
 
 
 ### Suggested Further Reading Material
