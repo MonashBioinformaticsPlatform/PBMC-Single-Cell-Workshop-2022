@@ -40,7 +40,9 @@ Install latest versions of:
 * RStudio
 * Seurat
 * SeuratWrappers
-* Monocle
+* SingleR
+* Celldex
+* Harmony
 
 *Venue:* Virtual workshop conducted via Zoom with breakout rooms. Zoom links will be provided after registration is complete.
 
@@ -60,7 +62,7 @@ It also draws from material for a [workshop provided by QCIF](https://swbioinf.g
 * [Cell Annotation with SingleR](http://bioconductor.org/books/devel/SingleRBook/)
 * [VDJ analysis with Immcantation](https://immcantation.readthedocs.io/en/stable/)
 
-### Useful links arising from the discussion during the workshop
+### Useful links arising from the discussion during the previous workshop
 *	[10x Genomics link to ribosomal protein expression](https://kb.10xgenomics.com/hc/en-us/articles/218169723-What-fraction-of-reads-map-to-ribosomal-proteins-)
 *	[10x Genomics link to mitochondrial gene expression](https://kb.10xgenomics.com/hc/en-us/articles/360001086611-Why-do-I-see-a-high-level-of-mitochondrial-gene-expression-)
 *   [scRNA Tools, catalogue of tools for scRNA Seq analysis](https://www.scrna-tools.org/)
