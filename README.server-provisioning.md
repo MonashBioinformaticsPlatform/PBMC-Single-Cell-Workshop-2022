@@ -46,7 +46,7 @@ Wait for them to get to a running status.
 Find any in Status=ERROR and delete them:
 ```bash
 ERROR_INSTANCE_IDS=$(openstack server list --status ERROR --format csv --quote none -c ID -c Name | tail -n +2 | \
-  grep ${PREFIX} | cut -f 1 -d ',')
+  grep ${PREFIX} | cut -f 1 -d ',' | xargs)
 
 for IID in ${ERROR_INSTANCE_IDS}; do
     openstack server delete ${IID}
@@ -63,9 +63,9 @@ openstack server list --format csv | tail -n +2 | \
   >ss_hosts
 
 INSTANCE_IDS=$(openstack server list --format csv --quote none -c ID -c Name | tail -n +2 | \
-  grep ${PREFIX} | cut -f 1 -d ',')
+  grep ${PREFIX} | cut -f 1 -d ',' | xargs)
 INSTANCE_NAMES=$(openstack server list --format csv --quote none -c ID -c Name | tail -n +2 | \
-  grep ${PREFIX} | cut -f 2 -d ',')
+  grep ${PREFIX} | cut -f 2 -d ',' | xargs)
 
 # Make an Ansible inventory
 rm ss_hosts_inventory
@@ -98,7 +98,7 @@ EMAIL=Andrew.Perry@monash.edu
 ZONE=monash-biotraining.cloud.edu.au
 
 INSTANCE_IDS=$(openstack server list --status ACTIVE --format csv --quote none -c ID -c Name | tail -n +2 | \
-  grep ${PREFIX} | cut -f 1 -d ',')
+  grep ${PREFIX} | cut -f 1 -d ',' | xargs)
 
 # Create DNS records matching the instance names
 for IID in ${INSTANCE_IDS}; do
@@ -113,7 +113,7 @@ Add SSL certs with Let's Encrypt:
 ``` bash
 
 INSTANCE_IDS=$(openstack server list --status ACTIVE --format csv --quote none -c ID -c Name | tail -n +2 | \
-  grep ${PREFIX} | cut -f 1 -d ',')
+  grep ${PREFIX} | cut -f 1 -d ',' | xargs)
   
 for IID in ${INSTANCE_IDS}; do
     eval $(openstack server show ${IID} -f shell -c name -c accessIPv4)
@@ -145,7 +145,7 @@ This should be uploaded to Google Sheets and shared with participants to claim a
 
 ```bash
 ACTIVE_INSTANCES=$(openstack server list --status ACTIVE --format csv --quote none -c ID -c Name | tail -n +2 | \
-  grep ${PREFIX} | cut -f 2 -d ',')
+  grep ${PREFIX} | cut -f 2 -d ',' | xargs)
 
 # Pause them all for later
 openstack server pause ${ACTIVE_INSTANCES}
@@ -157,7 +157,7 @@ Before the workshop starts:
 ```bash
 
 PAUSED_INSTANCES=$(openstack server list --status PAUSED --format csv --quote none -c ID -c Name | \
-  tail -n +2 | grep ${PREFIX} | cut -f 2 -d ',')
+  tail -n +2 | grep ${PREFIX} | cut -f 2 -d ',' | xargs)
 # Unpause when needed
 openstack server unpause ${PAUSED_INSTANCES}
 ```
@@ -169,7 +169,7 @@ EMAIL=Andrew.Perry@monash.edu
 ZONE=monash-biotraining.cloud.edu.au
 
 INSTANCE_IDS=$(openstack server list --status ACTIVE --format csv --quote none -c ID -c Name | tail -n +2 | \
-  grep ${PREFIX} | cut -f 1 -d ',')
+  grep ${PREFIX} | cut -f 1 -d ',' | xargs)
 
 echo $INSTANCE_IDS
 
@@ -178,7 +178,7 @@ for INSTANCE in $INSTANCE_IDS; do
     openstack server delete $INSTANCE
 done
 
-RECORD_IDS=$(openstack recordset list -f csv ${ZONE}. --quote none | grep ${PREFIX} | cut -d, -f 1)
+RECORD_IDS=$(openstack recordset list -f csv ${ZONE}. --quote none | grep ${PREFIX} | cut -d, -f 1 | xargs)
 
 echo $RECORD_IDS
 
