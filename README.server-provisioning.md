@@ -24,7 +24,7 @@ source Monash-biotraining-openrc.sh
 
 Create 20 instances:
 ```bash
-IMAGE=rstudio-seurat_20220301
+IMAGE=rstudio-seurat_20221116
 N_INSTANCES=20
 AZ=monash-02
 PREFIX=sswrkshp
