@@ -108,6 +108,10 @@ done
 ```
 
 _It should only take a minute or two for the DNS records to become active_
+_ When this returns nothing, all records should be active ..._
+```bash
+openstack recordset list ${ZONE}. --format csv --quote none -c id -c name -c status | tail -n +2 |   grep ${PREFIX} | grep -v ACTIVE
+```
 
 Add SSL certs with Let's Encrypt:
 ``` bash
