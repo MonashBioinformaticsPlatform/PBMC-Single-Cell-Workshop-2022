@@ -107,10 +107,12 @@ for IID in ${INSTANCE_IDS}; do
 done
 ```
 
-_It should only take a minute or two for the DNS records to become active_
-_ When this returns nothing, all records should be active ..._
+_It should only take a minute or two for the DNS records to become active. When this returns nothing, all records should be active ..._
 ```bash
-openstack recordset list ${ZONE}. --format csv --quote none -c id -c name -c status | tail -n +2 |   grep ${PREFIX} | grep -v ACTIVE
+openstack recordset list ${ZONE}. --format csv --quote none -c id -c name -c status | \
+  tail -n +2 | \
+  grep ${PREFIX} | \
+  grep -v ACTIVE
 ```
 
 Add SSL certs with Let's Encrypt:
@@ -178,9 +180,7 @@ INSTANCE_IDS=$(openstack server list --status ACTIVE --format csv --quote none -
 echo $INSTANCE_IDS
 
 # Delete instances
-for INSTANCE in $INSTANCE_IDS; do
-    openstack server delete $INSTANCE
-done
+openstack server delete $INSTANCE_IDS
 
 RECORD_IDS=$(openstack recordset list -f csv ${ZONE}. --quote none | grep ${PREFIX} | cut -d, -f 1 | xargs)
 
