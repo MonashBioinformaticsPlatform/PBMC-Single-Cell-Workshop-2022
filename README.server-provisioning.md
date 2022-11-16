@@ -133,6 +133,21 @@ done
 #ansible all -i ss_hosts -m user -a "sudo certbot --nginx --agree-tos --no-eff-email --non-interactive --redirect -d ${FQDN} -m ${EMAIL} --post-hook \"systemctl reload nginx.service\"" -u ubuntu --become
 ```
 
+## Optional: Nuke active sessions for the workshop user
+I've found if the image snapshot has a 'stale' RStudio session, an error dialog about a session being terminated comes up upon login.
+This can throw some users, so better to not see that dialog - we nuke the active sessions for the user and then it won't.
+
+```bash
+WUSER=tenxr
+
+for IID in ${INSTANCE_IDS}; do
+    eval $(openstack server show ${IID} -f shell -c name -c accessIPv4)
+    FQDN="${name}.${ZONE}"
+    ssh -oStrictHostKeyChecking=accept-new -o "UserKnownHostsFile=/dev/null" ubuntu@${FQDN} \ 
+      "sudo rm -rf /home/${WUSER}/.local/share/rstudio/sessions/active"
+done
+```
+
 ## Generate a spreadsheet listing instances
 ```bash
 # Make a CSV to import into Google Sheets for participants to claim a VM
