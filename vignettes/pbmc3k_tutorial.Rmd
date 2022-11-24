@@ -44,10 +44,10 @@ Please go to the [installation page](https://monashbioinformaticsplatform.github
 
 # Setup the Seurat Object
 
-For this tutorial, we will be analyzing the a dataset of Peripheral Blood Mononuclear Cells (PBMC) freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz). In this example, the raw data has already been processed through the [cellranger pipeline](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) and we are working with the pipeline output.
+For this tutorial, we will be analyzing the a dataset of Peripheral Blood Mononuclear Cells (PBMC) freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz). In this example, the raw data has already been processed through the cellranger pipeline and we are working with the pipeline output.
 
 Cellranger produces three files:
-f
+
 * barcodes.tsv - a text file containing the list of cell barcodes for the sample
 * features.tsv - a text file containing information about the features in the dataset. For this specific dataset, this file instead is called `genes.tsv` as it has been produced by an older version of cellranger. It contains the list of gene annotations the data was counted against. Now since cellranger can be used with different types of experiment (e.g ATAC, hashtag oligos, cell surface proteins) - the word 'feature' is used instead as you might have the hashtag oligo names listed here or peak names
 * matrix.mtx - this sparse matrix encodes the count data. It only includes non-zero data and the first two columns maps to the information contain in the `features.tsv` and the `barcodes.tsv` files. The first three rows in the file contains information about the file type - the type of file it is and the dimensions of data ie the number of features, the number of cells and then the total number of rows containing data in the matrix file (excluding the first rows).
@@ -593,6 +593,13 @@ DimPlot(pbmc, reduction='umap', group.by='SingleR.labels')
 ```
 
 It is nice to see that SingleR does not use the clusters we computed earlier, but the labels do seem to match those clusters reasonably well.
+
+#### Challenge: Reference Based Annotation {.challenge}
+
+See if you can annotate the data with the fine labels from the Monoco reference dataset and whether it improves the cell type annotation resolution. Do you lose any groups?
+
+Remember you can view the list of references with ls('package:celldex')
+
 
 
 # Data set integration with Harmony
