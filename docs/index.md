@@ -45,7 +45,6 @@ Install latest versions of:
 * Celldex
 * Harmony
 
-*Venue:* Virtual workshop conducted via Zoom with breakout rooms. Zoom links will be provided after registration is complete.
 
 ### Acknowledgements
 
