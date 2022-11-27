@@ -3,7 +3,7 @@
 
 # Please go to the [installation page](https://monashbioinformaticsplatform.github.io/Single-Cell-Workshop/installation.html) for instructions on how to install the libraries used for this workshop. There are also instructions for downloading the [raw data](http://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz) there as well.
 
-# [The workshop homepage is here](https://monashbioinformaticsplatform.github.io/PBMC-Single-Cell-Workshop-2022/index.html)
+# [The workshop homepage is here](index.html)
 
 
 # Setup the Seurat Object --------
@@ -34,6 +34,8 @@ library(dplyr)
 library(ggplot2)
 library(Seurat)
 library(patchwork)
+library(clustree)
+library(RColorBrewer)
 
 # Load the PBMC dataset
 pbmc.data <- Read10X(data.dir = "filtered_gene_bc_matrices/hg19/") # This creates a sparse matrix
@@ -118,6 +120,14 @@ GetAssayData(object = pbmc, slot = "data")[1:5, 1:5]
 
 ## QC and selecting cells for further analysis --------
 
+
+### Why do we need to do this? --------
+
+# Low quality cells can add noise to your results leading you to the wrong biological conclusions. Using only good quality cells helps you to avoid this.
+# Reduce noise in the data by filtering out low quality cells such as dying or stressed cells (high mitochondrial expression) and cells with few features that can reflect empty droplets.
+
+# ###
+
 # Seurat allows you to easily explore QC metrics and filter cells based on any user-defined criteria. A few QC metrics [commonly used](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4758103/) by the community include
 
 # * The number of unique genes detected in each cell.
@@ -125,7 +135,7 @@ GetAssayData(object = pbmc, slot = "data")[1:5, 1:5]
 #     + Cell doublets or multiplets may exhibit an aberrantly high gene count
 # * Similarly, the total number of molecules detected within a cell (correlates strongly with unique genes)
 # * The percentage of reads that map to the mitochondrial genome
-#     + Low-quality / dying cells often exhibit extensive mitochondrial contamination
+#     + Low-quality / dying cells often exhibit high numbers of mitochondrial transcripts. Be aware that different cell types have different mitochondrial expression, adjust this parameter accordently.
 #     + We calculate mitochondrial QC metrics with the PercentageFeatureSet() function, which calculates the percentage of counts originating from a set of features
 #     + We use the set of all genes starting with MT- as a set of mitochondrial genes
 
@@ -148,7 +158,7 @@ pbmc$percent.mt <- PercentageFeatureSet(pbmc, pattern = "^MT-")
 
 # In the example below, we visualize QC metrics, and use these to filter cells.
 
-# * We filter cells that have unique feature counts over 2,500 or less than 200
+# * We filter cells that have unique feature counts less than 200
 # * We filter cells that have >5% mitochondrial counts
 
 
@@ -191,7 +201,7 @@ plot3
 
 # Okay we are happy with our thresholds for mitochondrial percentage in cells, lets apply them and subset our data. This will remove the cells we think are of poor quality.
 
-pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & percent.mt < 5)
 
 # Lets replot the feature scatters and see what they look like.
 
@@ -203,6 +213,13 @@ plot5 + plot6
 
 # Normalizing the data --------
 
+
+### Why do we need to do this? --------
+
+# The sequencing depth can be different per cell. This can bias the counts of expression showing higher numbers for more sequenced cells leading to the wrong biological conclusions. To correct this the feature counts are normalized.
+
+# ###
+
 # After removing unwanted cells from the dataset, the next step is to normalize the data. By default, we employ a global-scaling normalization method "LogNormalize" that normalizes the feature expression measurements for each cell by the total expression, multiplies this by a scale factor (10,000 by default), and log-transforms the result. Normalized values are stored in pbmc$RNA@data.
 
 pbmc <- NormalizeData(pbmc, normalization.method = "LogNormalize", scale.factor = 1e4)
@@ -213,6 +230,13 @@ pbmc <- NormalizeData(pbmc)
 
 
 # Identification of highly variable features (feature selection) --------
+
+
+### Why do we need to do this? --------
+
+# Identifying the most variable features allows retaining the real biological variability of the data and reduce noise in the data.
+
+# ###
 
 # We next calculate a subset of features that exhibit high cell-to-cell variation in the dataset (i.e, they are highly expressed in some cells, and lowly expressed in others). The Seurat developers and [others](https://www.nature.com/articles/nmeth.2645) have found that focusing on these genes in downstream analysis helps to highlight biological signal in single-cell datasets.
 
@@ -236,7 +260,7 @@ plot1 + plot2
 # Make a plot with labels for the genes IL8, IDH2 and CXCL3.
 
 
-# Scaling the data --------
+## Scaling the data --------
 
 # Next, we apply a linear transformation ('scaling') that is a standard pre-processing step prior to dimensional reduction techniques like PCA. The ScaleData() function:
 
@@ -265,7 +289,17 @@ pbmc <- ScaleData(pbmc, features = all.genes)
 # However, particularly for advanced users who would like to use this functionality, the Seurat developers recommend their new normalization workflow, SCTransform(). The method is described in their [paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1874-1), with a separate vignette using Seurat v3 [here](sctransform_vignette.html). As with ScaleData(), the function SCTransform() also includes a vars.to.regress parameter.
 
 
-# Perform linear dimensional reduction --------
+# Dimensionality reduction --------
+
+
+### Why do we need to do this? --------
+
+# Imagine each gene represents a dimension - or an axis on a plot. We could plot the expression of two genes with a simple scatterplot. But a genome has thousands of genes - how do you collate all the information from each of those genes in a way that allows you to visualise it in a 2 dimensional image. This is where dimensionality reduction comes in, we calculate meta-features that contains combinations of the variation of different genes. From thousands of genes, we end up with 10s of meta-features
+
+# ###
+
+
+## Perform linear dimensional reduction --------
 
 # Next we perform PCA on the scaled data. By default, only the previously determined variable features are used as input, but can be defined using features argument if you wish to choose a different subset.
 
@@ -285,7 +319,7 @@ DimHeatmap(pbmc, dims = 1, cells = 500, balanced = TRUE)
 DimHeatmap(pbmc, dims = 1:15, cells = 500, balanced = TRUE)
 
 
-# Determine the 'dimensionality' of the dataset --------
+## Determine the 'dimensionality' of the dataset --------
 
 # To overcome the extensive technical noise in any single feature for scRNA-seq data, Seurat clusters cells based on their PCA scores, with each PC essentially representing a 'metafeature' that combines information across a correlated feature set. The top principal components therefore represent a robust compression of the dataset. However, how many components should we choose to include? 10? 20? 100?
 
@@ -302,22 +336,7 @@ ElbowPlot(pbmc)
 # * We advise users to err on the higher side when choosing this parameter. For example, performing downstream analyses with only 5 PCs does significantly and adversely affect results.
 
 
-# Cluster the cells --------
-
-# Seurat v3 applies a graph-based clustering approach, building upon initial strategies in ([Macosko *et al*](http://www.cell.com/abstract/S0092-8674(15)00549-8)). Importantly, the *distance metric* which drives the clustering analysis (based on previously identified PCs) remains the same. However, the Seurat approach to partitioning the cellular distance matrix into clusters has dramatically improved. The Seurat approach was heavily inspired by recent manuscripts which applied graph-based clustering approaches to scRNA-seq data [[SNN-Cliq, Xu and Su, Bioinformatics, 2015]](http://bioinformatics.oxfordjournals.org/content/early/2015/02/10/bioinformatics.btv088.abstract) and CyTOF data [[PhenoGraph, Levine *et al*., Cell, 2015]](http://www.ncbi.nlm.nih.gov/pubmed/26095251). Briefly, these methods embed cells in a graph structure - for example a K-nearest neighbor (KNN) graph, with edges drawn between cells with similar feature expression patterns, and then attempt to partition this graph into highly interconnected 'quasi-cliques' or 'communities'.
-
-# As in PhenoGraph, Seurat first constructs a KNN graph based on the euclidean distance in PCA space, and then refines the edge weights between any two cells based on the shared overlap in their local neighborhoods (Jaccard similarity). This step is performed using the FindNeighbors() function, and takes as input the previously defined dimensionality of the dataset (first 10 PCs).
-
-# To cluster the cells, Seurat next applies modularity optimization techniques such as the Louvain algorithm (default) or SLM [[SLM, Blondel *et al*., Journal of Statistical Mechanics]](http://dx.doi.org/10.1088/1742-5468/2008/10/P10008), to iteratively group cells together, with the goal of optimizing the standard modularity function. The FindClusters() function implements this procedure, and contains a resolution parameter that sets the 'granularity' of the downstream clustering, with increased values leading to a greater number of clusters. We find that setting this parameter between 0.4-1.2 typically returns good results for single-cell datasets of around 3K cells. Optimal resolution often increases for larger datasets. The clusters can be found using the Idents() function.
-
-pbmc <- FindNeighbors(pbmc, dims = 1:10)
-pbmc <- FindClusters(pbmc, resolution = 0.5)
-
-# Look at cluster IDs of the first 5 cells
-head(Idents(pbmc), 5)
-
-
-# Run non-linear dimensional reduction (UMAP/tSNE) --------
+## Run non-linear dimensional reduction (UMAP/tSNE) --------
 
 # Seurat offers several non-linear dimensional reduction techniques, such as tSNE and UMAP, to visualize and explore these datasets. The goal of these algorithms is to learn the underlying manifold of the data in order to place similar cells together in low-dimensional space. Cells within the graph-based clusters determined above should co-localize on these dimension reduction plots. As input to the UMAP and tSNE, we suggest using the same PCs as input to the clustering analysis.
 
@@ -327,10 +346,6 @@ pbmc <- RunUMAP(pbmc, dims = 1:10)
 # note that you can set `label = TRUE` or use the LabelClusters function to help label individual clusters
 DimPlot(pbmc, reduction = 'umap')
 
-# You can save the object at this point so that it can easily be loaded back in without having to rerun the computationally intensive steps performed above, or easily shared with collaborators.
-
-saveRDS(pbmc, file = "pbmc_tutorial.rds")
-
 
 #### Challenge: Try different cluster settings --------
 
@@ -339,7 +354,71 @@ saveRDS(pbmc, file = "pbmc_tutorial.rds")
 # To maintain the flow of this tutorial, please put the output of this exploration in a different variable, such as pbmc2!
 
 
-# Finding differentially expressed features (cluster biomarkers) --------
+# Cluster the cells --------
+
+
+### Why do we need to do this? --------
+
+# Clustering the cells will you to visualise the variability of your data, can help to segregate cells into cell types.
+
+# ###
+
+# Seurat v3 applies a graph-based clustering approach, building upon initial strategies in ([Macosko *et al*](http://www.cell.com/abstract/S0092-8674(15)00549-8)). Importantly, the *distance metric* which drives the clustering analysis (based on previously identified PCs) remains the same. However, the Seurat approach to partitioning the cellular distance matrix into clusters has dramatically improved. The Seurat approach was heavily inspired by recent manuscripts which applied graph-based clustering approaches to scRNA-seq data [[SNN-Cliq, Xu and Su, Bioinformatics, 2015]](http://bioinformatics.oxfordjournals.org/content/early/2015/02/10/bioinformatics.btv088.abstract) and CyTOF data [[PhenoGraph, Levine *et al*., Cell, 2015]](http://www.ncbi.nlm.nih.gov/pubmed/26095251). Briefly, these methods embed cells in a graph structure - for example a K-nearest neighbor (KNN) graph, with edges drawn between cells with similar feature expression patterns, and then attempt to partition this graph into highly interconnected 'quasi-cliques' or 'communities'.
+
+# As in PhenoGraph, Seurat first constructs a KNN graph based on the euclidean distance in PCA space, and then refines the edge weights between any two cells based on the shared overlap in their local neighborhoods (Jaccard similarity). This step is performed using the FindNeighbors() function, and takes as input the previously defined dimensionality of the dataset (first 10 PCs).
+
+# To cluster the cells, Seurat next applies modularity optimization techniques such as the Louvain algorithm (default) or SLM [[SLM, Blondel *et al*., Journal of Statistical Mechanics]](http://dx.doi.org/10.1088/1742-5468/2008/10/P10008), to iteratively group cells together, with the goal of optimizing the standard modularity function. The FindClusters() function implements this procedure, and contains a resolution parameter that sets the 'granularity' of the downstream clustering, with increased values leading to a greater number of clusters. We find that setting this parameter between 0.4-1.2 typically returns good results for single-cell datasets of around 3K cells. Optimal resolution often increases for larger datasets. The clusters can be found using the Idents() function.
+
+pbmc <- FindNeighbors(pbmc, dims = 1:10)
+
+
+# Try different resolutions when clustering to identify the varibility of your data. The function [FindClusters](https://satijalab.org/seurat/reference/findclusters) is used to cluster the data
+
+resolution= 2
+
+pbmc <- FindClusters(
+  object = pbmc,
+  reduction.type = "umap",
+  resolution = seq(0.1,resolution,0.1),
+  dims.use = 1:10,
+  save.SNN = TRUE
+)
+
+# the different clustering created
+head(pbmc)
+
+# Look at cluster IDs of the first 5 cells
+head(Idents(pbmc), 5)
+
+# Plot a [clustree](https://cran.r-project.org/web/packages/clustree/vignettes/clustree.html) to decide how many clusters you have and what resolution capture them.
+
+clustree(pbmc, prefix = "RNA_snn_res.")+theme(legend.key.size = unit(0.05, 'cm'))
+
+# Name cells with the corresponding cluster name at the resolution you pick. This case we are happy with 0.5.
+
+#The name of the cluster is prefixed with "RNA_snn_res" and the number of the resolution
+Idents(pbmc)<-pbmc$RNA_snn_res.0.5
+
+# Plot the UMAP with colored clusters with [Dimplot](https://satijalab.org/seurat/reference/dimplot)
+
+DimPlot(pbmc,label = TRUE, repel = TRUE,label.box=TRUE)+ NoLegend()
+
+# You can save the object at this point so that it can easily be loaded back in without having to rerun the computationally intensive steps performed above, or easily shared with collaborators.
+
+saveRDS(pbmc, file = "pbmc_tutorial.rds")
+
+
+# Cell type annotation --------
+
+
+## Finding differentially expressed features (cluster biomarkers) --------
+
+
+### Why do we need to do this? --------
+
+# Single cell data helps to segragate cell types. Use markers to identify cell types. warning: In this example the cell types/markers are well known and making this step easy, but in reality this step needs the experts curation.
+
+# ###
 
 # Seurat can help you find markers that define clusters via differential expression. By default, it identifies positive and negative markers of a single cluster (specified in ident.1), compared to all other cells.  FindAllMarkers() automates this process for all clusters, but you can also test groups of clusters vs. each other, or against all cells.
 
@@ -385,10 +464,32 @@ DotPlot(pbmc, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", 
 # DoHeatmap() generates an expression heatmap for given cells and features. In this case, we are plotting the top 20 markers (or all markers if less than 20) for each cluster.
 
 top10 <- pbmc.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_log2FC)
-DoHeatmap(pbmc, features = top10$gene) + NoLegend()
+DoHeatmap(pbmc, features = top10$gene) + NoLegend() + theme(axis.text.x =element_text(size = 5),text =element_text(size = 5) ,axis.text.y =element_text(size = 5))
 
 
-# Assigning cell type identity to clusters --------
+## Use makers to label or find a cluster --------
+
+# If you know markers fro your cell types, use [AddModuleScore](https://satijalab.org/seurat/reference/addmodulescore) to label them.
+
+
+genes_markers <- list(Naive_CD4_T=c("IL7R", "CCR7"))
+
+pbmc<- AddModuleScore( object =pbmc,features = genes_markers,ctrl = 5,name = "Naive_CD4_T", search=TRUE)
+
+#color scale for better visualization
+plotCol = rev(brewer.pal(n = 7, name = "RdYlBu"))
+
+#notice the name of the cluster has a 1 at the end
+FeaturePlot(pbmc,
+                  features = "Naive_CD4_T1", label=TRUE , repel = TRUE, ) +
+  scale_color_gradientn(colors = plotCol)
+
+ # label that cell type
+ #Ident(pbmc[pbmc$Naive_CD4_T1>1])="Naive_CD4_T"
+
+
+
+## Assigning cell type identity to clusters --------
 
 # Fortunately in the case of this dataset, we can use canonical markers to easily match the unbiased clustering to known cell types:
 
@@ -414,7 +515,7 @@ saveRDS(pbmc, file = "pbmc3k_final.rds")
 write.csv(x = t(as.data.frame(all_times)), file = "pbmc3k_tutorial_times.csv")
 
 
-# SingleR --------
+## SingleR --------
 
 #install.packages("BiocManager")
 #BiocManager::install(c("SingleCellExperiment","SingleR","celldex"),ask=F)
@@ -454,7 +555,21 @@ DimPlot(pbmc, reduction='umap', group.by='SingleR.labels')
 # It is nice to see that SingleR does not use the clusters we computed earlier, but the labels do seem to match those clusters reasonably well.
 
 
+#### Challenge: Reference Based Annotation --------
+
+# See if you can annotate the data with the fine labels from the Monoco reference dataset and whether it improves the cell type annotation resolution. Do you lose any groups?
+
+# Remember you can view the list of references with ls('package:celldex')
+
+
 # Data set integration with Harmony --------
+
+
+### Why do we need to do this? --------
+
+# You can have data coming from different samples, batches or experiments and you will need to combine them.
+
+# ###
 
 # When data is collected from multiple samples, multiple runs of the single cell sequencing library preparation, or multiple conditions, cells of the same type may become separated in the UMAP and be put into several different clusters.
 

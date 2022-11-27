@@ -63,5 +63,9 @@ BiocManager::install(c('SingleR', 'celldex',
 ## Install dev versions of some interactive graphics packages
 remotes::install_github("plotly/plotly.R")
 remotes::install_github("pfh/langevitour")
+
+## install clustree
+install.packages("clustree")
+install.packages("RColorBrewer")
 ```
 
