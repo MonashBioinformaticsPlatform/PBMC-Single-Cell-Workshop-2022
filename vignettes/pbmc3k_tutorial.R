@@ -359,7 +359,7 @@ DimPlot(pbmc, reduction = 'umap')
 
 ### Why do we need to do this? --------
 
-# Clustering the cells will you to visualise the variability of your data, can help to segregate cells into cell types.
+# Clustering the cells will allow you to visualise the variability of your data, can help to segregate cells into cell types.
 
 # ###
 
@@ -385,7 +385,7 @@ pbmc <- FindClusters(
 )
 
 # the different clustering created
-head(pbmc)
+names(pbmc@meta.data)
 
 # Look at cluster IDs of the first 5 cells
 head(Idents(pbmc), 5)
@@ -469,7 +469,7 @@ DoHeatmap(pbmc, features = top10$gene) + NoLegend() + theme(axis.text.x =element
 
 ## Use makers to label or find a cluster --------
 
-# If you know markers fro your cell types, use [AddModuleScore](https://satijalab.org/seurat/reference/addmodulescore) to label them.
+# If you know markers for your cell types, use [AddModuleScore](https://satijalab.org/seurat/reference/addmodulescore) to label them.
 
 
 genes_markers <- list(Naive_CD4_T=c("IL7R", "CCR7"))
@@ -480,12 +480,17 @@ pbmc<- AddModuleScore( object =pbmc,features = genes_markers,ctrl = 5,name = "Na
 plotCol = rev(brewer.pal(n = 7, name = "RdYlBu"))
 
 #notice the name of the cluster has a 1 at the end
+names(pbmc@meta.data)
+
+# label that cell type
+pbmc$cell_label=NA
+pbmc$cell_label[pbmc$Naive_CD4_T1>1]="Naive_CD4_T"
+Idents(pbmc)=pbmc$cell_label
+
+#plot
 FeaturePlot(pbmc,
                   features = "Naive_CD4_T1", label=TRUE , repel = TRUE, ) +
   scale_color_gradientn(colors = plotCol)
-
- # label that cell type
- #Ident(pbmc[pbmc$Naive_CD4_T1>1])="Naive_CD4_T"
 
 
 
@@ -505,6 +510,7 @@ FeaturePlot(pbmc,
 # 7          | FCER1A, CST3  | DC
 # 8          | PPBP          | Platelet
 
+Idents(pbmc)<-pbmc$RNA_snn_res.0.5
 new.cluster.ids <- c("Naive CD4 T", "CD14+ Mono", "Memory CD4 T", "B", "CD8 T", "FCGR3A+ Mono", "NK", "DC", "Platelet")
 names(new.cluster.ids) <- levels(pbmc)
 pbmc <- RenameIdents(pbmc, new.cluster.ids)
