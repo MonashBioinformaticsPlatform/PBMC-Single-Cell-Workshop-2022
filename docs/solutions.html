@@ -1343,6 +1343,16 @@ background: #ddf;
 .challenge > :first-child, .challenge > :nth-child(2) {
 margin-top: 0;
 }
+.rational {
+margin: 2em;
+padding: 1em;
+border: 1px solid black;
+border-radius: 5px;
+background: rgb(180, 240, 185);
+}
+.rational > :first-child, .challenge > :nth-child(2) {
+margin-top: 0;
+}
 </style>
 
 
@@ -1502,7 +1512,7 @@ border-radius: 0px;
 
 
 <h1 class="title toc-ignore">Solutions to challenges</h1>
-<h4 class="date">Compiled: November 15, 2022</h4>
+<h4 class="date">Compiled: November 27, 2022</h4>
 
 </div>
 
@@ -1587,6 +1597,33 @@ muddled in the UMAP:</p>
 pbmc3 &lt;- FindClusters(pbmc3, resolution = 0.5)
 DimPlot(pbmc3, reduction = &#39;pca&#39;, dims=c(1,2))
 DimPlot(pbmc3, reduction = &#39;umap&#39;)</code></pre>
+</div>
+<div id="challenge-reference-based-annotation" class="section level2">
+<h2>Challenge: Reference Based Annotation</h2>
+<p>See if you can annotate the data with the fine labels from the Monoco
+reference dataset and whether it improves the cell type annotation
+resolution.</p>
+<pre class="r"><code>monaco &lt;- celldex::MonacoImmuneData()
+monaco.pred.fine &lt;- SingleR::SingleR(
+  test = sce, ref = monaco, labels = monaco$label.fine)
+
+pbmc$monaco_fine &lt;- monaco.pred.fine$labels
+DimPlot(pbmc, reduction=&#39;umap&#39;, group.by=&#39;monaco_fine&#39;)</code></pre>
+<ul>
+<li>The T cell &amp; monocyte groups will have more specific cell
+groups. Discuss the difference between labelling an entire cluster and
+individual annotating cells - do you believe that every cell in a
+cluster belongs to the group or do you believe that you have a mix of
+cell types?</li>
+</ul>
+<p>Do you lose any groups?</p>
+<ul>
+<li>The platelet cells that were previously identified are no longer
+being annotated as platelets. The Monoco reference doesn’t contain any
+information about platelets and so SingleR doesn’t label them as such.
+This is a weakness of reference based methods - they are only as good as
+your reference</li>
+</ul>
 </div>
 
 
