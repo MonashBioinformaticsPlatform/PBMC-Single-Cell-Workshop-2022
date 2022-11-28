@@ -42,9 +42,12 @@ Please go to the [installation page](https://monashbioinformaticsplatform.github
 
 [The workshop homepage is here](index.html)
 
+We suggest working from the `pbmc3k_tutorial.R` script that you would have downloaded as part of the [workshop setup instructions](https://monashbioinformaticsplatform.github.io/Single-Cell-Workshop/installation.html). This script will have all the code that we will be using for the duration of the workshop.
+
+
 # Setup the Seurat Object
 
-For this tutorial, we will be analyzing the a dataset of Peripheral Blood Mononuclear Cells (PBMC) freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz). In this example, the raw data has already been processed through the cellranger pipeline and we are working with the pipeline output.
+For this tutorial, we will be analyzing the a dataset of Peripheral Blood Mononuclear Cells (PBMC) freely available from 10X Genomics. There are 2,700 single cells that were sequenced on the Illumina NextSeq 500. The raw data can be found [here](https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz). In this example, the raw data has already been processed through the cellranger pipeline and we are working with the pipeline output. If you're interested, you can see the [preliminary cellranger QC report here.](https://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_web_summary.html)
 
 Cellranger produces three files:
 
@@ -112,6 +115,10 @@ dense.size / sparse.size
 Lets take a look at the seurat object we have just created in R, `pbmc`.
 
 To accomodate the complexity of data arising from a single cell RNA seq experiment, the seurat object keeps this as a container of multiple data tables that are linked.
+
+```{r, echo=FALSE}
+knitr::include_graphics("https://raw.githubusercontent.com/MonashBioinformaticsPlatform/PBMC-Single-Cell-Workshop-2022/main/vignettes/seurat_object.png")
+```
 
 The functions in Seurat can access parts of the data object for analysis and visualisation, we will cover this later on. 
 
