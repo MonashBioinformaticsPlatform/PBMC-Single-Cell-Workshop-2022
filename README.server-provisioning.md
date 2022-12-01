@@ -147,7 +147,7 @@ for IID in ${INSTANCE_IDS}; do
     eval $(openstack server show ${IID} -f shell -c name -c accessIPv4)
     FQDN="${name}.${ZONE}"
     ssh -oStrictHostKeyChecking=accept-new -o "UserKnownHostsFile=/dev/null" ubuntu@${FQDN} \ 
-      "sudo rm -rf /home/${WUSER}/.local/share/rstudio/sessions/active"
+      "sudo rm -rf /home/${WUSER}/.local/share/rstudio"
 done
 ```
 
