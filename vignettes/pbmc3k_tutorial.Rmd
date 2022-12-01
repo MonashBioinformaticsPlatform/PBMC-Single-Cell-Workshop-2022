@@ -42,7 +42,7 @@ Please go to the [installation page](installation.html) for instructions on how 
 
 [The workshop homepage is here](index.html)
 
-We suggest working from the `pbmc3k_tutorial.R` script that you would have downloaded as part of the [workshop setup instructions](https://monashbioinformaticsplatform.github.io/Single-Cell-Workshop/installation.html). This script will have all the code that we will be using for the duration of the workshop.
+We suggest working from the `pbmc3k_tutorial.R` script that you would have downloaded as part of the [workshop setup instructions](installation.html). This script will have all the code that we will be using for the duration of the workshop.
 
 
 # Setup the Seurat Object
