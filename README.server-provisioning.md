@@ -24,7 +24,7 @@ source Monash-biotraining-openrc.sh
 
 Create 20 instances:
 ```bash
-IMAGE=rstudio-seurat_20221116-2
+IMAGE=rstudio-seurat_20221201
 N_INSTANCES=20
 AZ=monash-02
 PREFIX=sswrkshp
@@ -120,7 +120,10 @@ Add SSL certs with Let's Encrypt:
 
 INSTANCE_IDS=$(openstack server list --status ACTIVE --format csv --quote none -c ID -c Name | tail -n +2 | \
   grep ${PREFIX} | cut -f 1 -d ',' | xargs)
-  
+
+# You'll need the approriate SSH key loaded into ssh-agent
+# ssh-add ~/.ssh/key_for_instances
+
 for IID in ${INSTANCE_IDS}; do
     eval $(openstack server show ${IID} -f shell -c name -c accessIPv4)
     FQDN="${name}.${ZONE}"
