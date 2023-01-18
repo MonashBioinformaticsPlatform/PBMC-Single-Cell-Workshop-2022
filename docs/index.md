@@ -11,7 +11,7 @@ Important links:
 
 * [Installation and Setup instructions](installation.html)
 * [PBMC Workshop material](pbmc3k_tutorial.html)
-* [Slideshow introduction](https://github.com/MonashBioinformaticsPlatform/PBMC-Single-Cell-Workshop-2022/blob/d7cec798b9f85a5f81f638833d92c68b46ec3a1c/Single%20Cell%20Seurat.pdf)
+* [Slideshow introduction](https://github.com/MonashBioinformaticsPlatform/PBMC-Single-Cell-Workshop-2022/blob/main/Single%20Cell%20Seurat.pdf)
 
 * [Dimensionality reduction example](dimred.html)
 * [Interactive widgets demo](interact.html)
