@@ -153,7 +153,7 @@ done
 ## Generate a spreadsheet listing instances
 ```bash
 # Make a CSV to import into Google Sheets for participants to claim a VM
-rm ss_fqdns.csv
+rm -f ss_fqdns.csv
 echo 'URL,IP,"Claimed by"' >ss_fqdns.csv
 for IID in ${INSTANCE_IDS}; do
     eval $(openstack server show ${IID} -f shell -c name -c accessIPv4)
