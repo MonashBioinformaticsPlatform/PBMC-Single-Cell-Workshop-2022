@@ -68,7 +68,7 @@ INSTANCE_NAMES=$(openstack server list --format csv --quote none -c ID -c Name |
   grep ${PREFIX} | cut -f 2 -d ',' | xargs)
 
 # Make an Ansible inventory
-rm ss_hosts_inventory
+rm -f ss_hosts_inventory
 for IID in $INSTANCE_IDS; do
     eval $(openstack server show ${IID} -f shell -c name -c accessIPv4)
     echo "${name} ansible_host=${accessipv4}" >>ss_hosts_inventory
