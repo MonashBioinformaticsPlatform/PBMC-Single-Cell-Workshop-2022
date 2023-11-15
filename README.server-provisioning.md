@@ -32,7 +32,7 @@ PREFIX=sswrkshp
 openstack server create \
   --image ${IMAGE} \
   --key-name mbp_hosts \
-  --flavor m3.small \
+  --flavor m3.medium \
   --availability-zone ${AZ} \
   --security-group default \
   --security-group http-https-traffic \
@@ -140,7 +140,7 @@ I've found if the image snapshot has a 'stale' RStudio session, an error dialog 
 This can throw some users, so better to not see that dialog - we nuke the active sessions for the user and then it won't.
 
 ```bash
-WUSER=tenxr
+WUSER=binfie
 
 for IID in ${INSTANCE_IDS}; do
     eval $(openstack server show ${IID} -f shell -c name -c accessIPv4)
