@@ -76,17 +76,16 @@ done
 ```
 
 ## Change the password for the workshop user account
-**TODO:** Check this works ...
-
 This password is communicated with the participants on the day.
 
 ```bash
 ACCOUNT_NAME=????  # fill this in
 PWORD=????         # fill this in
 
-ansible -i ss_hosts_inventory all -m user \
-  -a "name=${ACCOUNT_NAME} update_password=always password={{ newpassword|password_hash('sha512') }}" \
-  -b --extra-vars "newpassword=${PWORD}"
+export ANSIBLE_HOST_KEY_CHECKING=False
+ansible -u ubuntu --private-key ~/.ssh/mbp_hosts -i ss_hosts_inventory all \
+        -m user -a "name=${ACCOUNT_NAME} update_password=always password={{ newpassword|password_hash('sha512') }}" \
+        -b --extra-vars "newpassword=${PWORD}"
 ```
 
 ## Create DNS records + SSL certs
